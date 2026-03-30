@@ -343,11 +343,12 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
         <h2 id="course-title" style="margin:0; font-size:1.8rem; text-align:left;">--- <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span></h2>
         
         <div class="top-bar-controls" style="justify-content:center;">
-            <!-- Info de usuario Firebase -->
-            <div id="user-info" class="hidden teacher-only" style="display:flex; align-items:center; gap:8px; padding: 6px 12px; background:var(--btnBg); border:2px solid var(--btnBorder); border-radius:14px;">
-                <img id="user-avatar" src="" width="28" height="28" style="border-radius:50%; object-fit:cover;" onerror="this.style.display='none'">
-                <span id="user-name" style="font-size:0.85rem; font-weight:900; color:var(--btnText);"></span>
-            </div>
+            <!-- Perfil de usuario (clickeable) -->
+            <button id="user-profile-btn" class="hidden teacher-only" onclick="toggleUserMenu()" title="Mi cuenta" style="display:flex; align-items:center; gap:8px; padding:5px 12px 5px 5px !important; background:var(--btnBg) !important; border:2px solid var(--btnBorder) !important; border-bottom-width:3px !important; border-radius:50px !important; cursor:pointer; transition:0.2s;">
+                <img id="user-avatar" src="" width="32" height="32" style="border-radius:50%; object-fit:cover; border:2px solid var(--purplePrimary);" onerror="this.style.display='none'">
+                <span id="user-name" style="font-size:0.9rem; font-weight:900; color:var(--btnText); max-width:100px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;"></span>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" style="color:var(--subText); flex-shrink:0;"><path d="m6 9 6 6 6-6"/></svg>
+            </button>
             <button onclick="switchView('courses')" title="Volver al Menú de Cursos" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
             <button id="btn-show-guide" onclick="showGuide()" title="Manual de Puntos (Cómo ganar XP)" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía</button>
             <button onclick="showShop()" title="Tienda de Recompensas" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Tienda</button>
@@ -372,9 +373,6 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
             
             <button id="btn-toggle-role" onclick="toggleRole()" title="Cambiar Vista">👀 Modo Estudiantes</button>
-            <button class="teacher-only" id="btn-signout" onclick="signOut()" title="Cerrar Sesión" style="display:flex; align-items:center; gap:5px; background:#FEE2E2 !important; color:#DC2626 !important; border-color:#FECACA !important;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </button>
             <button onclick="toggleCinemaMode()" title="Modo Pantalla Completa / Cinema" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 12h10"/><path d="M10 9v6"/><path d="M14 9v6"/></svg></button>
             <button class="teacher-only" onclick="openConfig()" title="Configuración" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
         </div>
@@ -396,6 +394,23 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 </div>
 
 
+
+<!-- Modal Menu de Usuario -->
+<div id="modal-user-menu" class="hidden" style="position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:5000; background:var(--modalBg); border-radius:20px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,0.25); border:2px solid var(--btnBorder); min-width:280px; text-align:center;">
+    <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--rowBg); border-radius:14px; margin-bottom:15px;">
+        <img id="menu-user-avatar" src="" width="48" height="48" style="border-radius:50%; object-fit:cover; border:3px solid var(--purplePrimary); flex-shrink:0;">
+        <div style="text-align:left;">
+            <div id="menu-user-name" style="font-weight:900; font-size:1.1rem; color:var(--text);"></div>
+            <div id="menu-user-email" style="font-size:0.8rem; color:var(--subText); font-weight:800;"></div>
+        </div>
+    </div>
+    <button onclick="toggleUserMenu()" style="width:100%; padding:12px; margin-bottom:8px; border:2px solid var(--btnBorder); border-bottom-width:4px; border-radius:14px; background:var(--purplePrimary); color:#FFF; font-family:'Nunito'; font-weight:900; font-size:1rem; cursor:pointer;">
+        ✅ Continuar como Profesor
+    </button>
+    <button onclick="signOut()" style="width:100%; padding:12px; border:2px solid #FECACA; border-bottom-width:4px; border-radius:14px; background:#FEE2E2; color:#DC2626; font-family:'Nunito'; font-weight:900; font-size:1rem; cursor:pointer;">
+        🚪 Cerrar Sesión
+    </button>
+</div>
 
 <!-- Modal Perfil Estudiante -->
 <div id="modal-profile" class="modal-overlay hidden">
@@ -750,15 +765,39 @@ auth.onAuthStateChanged(user => {
     if (user) {
         currentUser = user;
         document.getElementById('login-overlay').style.display = 'none';
-        // Mostrar avatar y nombre
-        const userInfo = document.getElementById('user-info');
-        if(userInfo) { userInfo.classList.remove('hidden'); userInfo.style.display = 'flex'; }
+        // Mostrar botón de perfil en top bar
+        const profileBtn = document.getElementById('user-profile-btn');
+        if(profileBtn) { profileBtn.classList.remove('hidden'); profileBtn.style.display = 'flex'; }
+        // Rellenar datos del botón
         const avatar = document.getElementById('user-avatar');
         if(avatar && user.photoURL) avatar.src = user.photoURL;
         const nameEl = document.getElementById('user-name');
         if(nameEl) nameEl.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profe';
+        // Rellenar datos del menu flotante
+        const menuAvatar = document.getElementById('menu-user-avatar');
+        if(menuAvatar && user.photoURL) menuAvatar.src = user.photoURL;
+        const menuName = document.getElementById('menu-user-name');
+        if(menuName) menuName.textContent = user.displayName || 'Profesor';
+        const menuEmail = document.getElementById('menu-user-email');
+        if(menuEmail) menuEmail.textContent = user.email || '';
         // Cargar datos desde Firestore
         loadDataFromFirestore(user.uid);
+    }
+});
+
+function toggleUserMenu() {
+    const menu = document.getElementById('modal-user-menu');
+    menu.classList.toggle('hidden');
+}
+
+// Cerrar el menú de usuario al hacer clic fuera
+document.addEventListener('click', function(e) {
+    const menu = document.getElementById('modal-user-menu');
+    const btn = document.getElementById('user-profile-btn');
+    if (menu && !menu.classList.contains('hidden')) {
+        if (!menu.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
+            menu.classList.add('hidden');
+        }
     }
 });
 
