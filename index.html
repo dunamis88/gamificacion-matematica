@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Aventura Matemática - Gamificación 2.0</title>
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
 <style>
 :root {
   --bg: #F0F4F8; 
@@ -287,8 +292,25 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 </head>
 <body data-role="student">
 
+<!-- OVERLAY DE LOGIN -->
+<div id="login-overlay" style="position:fixed; inset:0; z-index:9999; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#FFF; border-radius:30px; padding:40px 35px; max-width:420px; width:100%; text-align:center; box-shadow:0 30px 60px rgba(0,0,0,0.3);">
+        <div style="font-size:4rem; margin-bottom:10px;">🚀</div>
+        <h1 style="font-size:2rem; color:#334155; margin:0 0 5px; font-weight:900;">Aventura Matemática</h1>
+        <p style="color:#94A3B8; font-weight:800; margin-bottom:30px;">Gamificación de Aula</p>
+        <button id="btn-google-login" onclick="loginWithGoogle()" style="display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:16px; border:2px solid #E2E8F0; border-bottom-width:4px; border-radius:16px; background:#FFF; cursor:pointer; font-family:'Nunito'; font-weight:900; font-size:1.1rem; color:#334155; margin-bottom:15px; transition:0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='#FFF'">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Iniciar sesión con Google (Profesor)
+        </button>
+        <button onclick="continueAsStudent()" style="width:100%; padding:14px; border:2px solid #E2E8F0; border-bottom-width:4px; border-radius:16px; background:#F8FAFC; cursor:pointer; font-family:'Nunito'; font-weight:900; font-size:1rem; color:#64748B; transition:0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'">
+            🎓 Pizarra Estudiantes (Sin login)
+        </button>
+        <p style="font-size:0.8rem; color:#CBD5E1; margin-top:20px; font-weight:800;">Solo el Profesor necesita cuenta de Google</p>
+    </div>
+</div>
+
 <!-- VISTA 1: Elegir Rol -->
-<div id="view-roles" class="view">
+<div id="view-roles" class="view hidden">
     <h1>🚀 Aventura Matemática</h1>
     <h2>Selecciona tu Modo de Acceso</h2>
     <p style="text-align:center; color:var(--subText); margin-bottom:30px;">
@@ -321,6 +343,11 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
         <h2 id="course-title" style="margin:0; font-size:1.8rem; text-align:left;">--- <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span></h2>
         
         <div class="top-bar-controls" style="justify-content:center;">
+            <!-- Info de usuario Firebase -->
+            <div id="user-info" class="hidden teacher-only" style="display:flex; align-items:center; gap:8px; padding: 6px 12px; background:var(--btnBg); border:2px solid var(--btnBorder); border-radius:14px;">
+                <img id="user-avatar" src="" width="28" height="28" style="border-radius:50%; object-fit:cover;" onerror="this.style.display='none'">
+                <span id="user-name" style="font-size:0.85rem; font-weight:900; color:var(--btnText);"></span>
+            </div>
             <button onclick="switchView('courses')" title="Volver al Menú de Cursos" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
             <button id="btn-show-guide" onclick="showGuide()" title="Manual de Puntos (Cómo ganar XP)" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía</button>
             <button onclick="showShop()" title="Tienda de Recompensas" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Tienda</button>
@@ -345,6 +372,9 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
             
             <button id="btn-toggle-role" onclick="toggleRole()" title="Cambiar Vista">👀 Modo Estudiantes</button>
+            <button class="teacher-only" id="btn-signout" onclick="signOut()" title="Cerrar Sesión" style="display:flex; align-items:center; gap:5px; background:#FEE2E2 !important; color:#DC2626 !important; border-color:#FECACA !important;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+            </button>
             <button onclick="toggleCinemaMode()" title="Modo Pantalla Completa / Cinema" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 12h10"/><path d="M10 9v6"/><path d="M14 9v6"/></svg></button>
             <button class="teacher-only" onclick="openConfig()" title="Configuración" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
         </div>
@@ -504,6 +534,22 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             <p style="font-size:0.95rem; color:var(--subText); margin-top:0;">Define qué acciones dan puntos y cuánta XP otorgan para que los alumnos lo vean en la Guía.</p>
             <div id="cfg-guide-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:15px; margin-bottom:20px;"></div>
             <button class="btn-sm b20" style="padding:12px 20px;" onclick="cfgAddGuideItem()">+ Agregar Regla al Manual</button>
+        </div>
+        <!-- Gestión de Datos y Copias -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); grid-column: 1 / -1; margin-top: 20px; border-style: dashed;">
+            <h3 style="margin-top:0; color:var(--text);">📦 Datos y Copias de Seguridad</h3>
+            <p style="font-size:0.95rem; color:var(--subText); margin-top:0;">Usa esto para pasar tus datos de un computador a otro.</p>
+            <div style="display:flex; gap:12px; flex-wrap:wrap;">
+                <button class="btn-sm b20" style="padding:12px 20px; display:flex; align-items:center; gap:8px;" onclick="exportData()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Descargar Copia (Exportar)
+                </button>
+                <button class="btn-sm b10" style="padding:12px 20px; display:flex; align-items:center; gap:8px;" onclick="document.getElementById('import-input').click()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Cargar Copia (Importar)
+                </button>
+                <input type="file" id="import-input" class="hidden" accept=".json" onchange="importData(event)">
+            </div>
         </div>
         
     </div>
@@ -665,9 +711,101 @@ if(localData) {
     try { courses = JSON.parse(localData); } catch(e){}
 }
 
-function saveData() {
-    localStorage.setItem('gamificacion_cursos', JSON.stringify(courses));
+// =============================================
+// FIREBASE SETUP
+// =============================================
+const firebaseConfig = {
+    apiKey: "AIzaSyAfVY2wIvoCuG23Hg-oKAKyW_A9wxFsJF8",
+    authDomain: "gamificacion-matematica.firebaseapp.com",
+    projectId: "gamificacion-matematica",
+    storageBucket: "gamificacion-matematica.firebasestorage.app",
+    messagingSenderId: "909072205881",
+    appId: "1:909072205881:web:517fbc5bbb405eb0fc65e8"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+let currentUser = null;
+
+function loginWithGoogle() {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    auth.signInWithPopup(provider).catch(err => alert('Error al iniciar sesión: ' + err.message));
 }
+
+function signOut() {
+    if(confirm('¿Cerrar sesión de profesor?')) {
+        auth.signOut().then(() => location.reload());
+    }
+}
+
+function continueAsStudent() {
+    document.getElementById('login-overlay').style.display = 'none';
+    role = 'student';
+    document.body.setAttribute('data-role', 'student');
+    switchView('courses');
+    renderCourses();
+}
+
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUser = user;
+        document.getElementById('login-overlay').style.display = 'none';
+        // Mostrar avatar y nombre
+        const userInfo = document.getElementById('user-info');
+        if(userInfo) { userInfo.classList.remove('hidden'); userInfo.style.display = 'flex'; }
+        const avatar = document.getElementById('user-avatar');
+        if(avatar && user.photoURL) avatar.src = user.photoURL;
+        const nameEl = document.getElementById('user-name');
+        if(nameEl) nameEl.textContent = user.displayName ? user.displayName.split(' ')[0] : 'Profe';
+        // Cargar datos desde Firestore
+        loadDataFromFirestore(user.uid);
+    }
+});
+
+async function loadDataFromFirestore(uid) {
+    try {
+        const snap = await db.collection('teachers').doc(uid).get();
+        if (snap.exists) {
+            const data = snap.data();
+            if (data.courses) courses = data.courses;
+            if (data.shop) shopItems = data.shop;
+            if (data.guide) rewardSources = data.guide;
+            if (data.points) pointValues = data.points;
+        }
+    } catch(e) {
+        console.warn('Error cargando desde Firestore, usando localStorage:', e);
+    }
+    // Ir a la app como profesor después de cargar
+    role = 'teacher';
+    document.body.setAttribute('data-role', 'teacher');
+    switchView('courses');
+    renderCourses();
+    updateMassXPText();
+}
+
+async function saveData() {
+    // Guardar siempre en localStorage (rápido y offline)
+    localStorage.setItem('gamificacion_cursos', JSON.stringify(courses));
+    // Si hay usuario logueado, guardar también en Firestore
+    if (currentUser) {
+        try {
+            await db.collection('teachers').doc(currentUser.uid).set({
+                courses: courses,
+                shop: shopItems,
+                guide: rewardSources,
+                points: pointValues,
+                updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+        } catch(e) {
+            console.warn('Error guardando en Firestore:', e);
+        }
+    }
+}
+
+// =============================================
+// FIN FIREBASE SETUP
+// =============================================
+
 
 // --- Manejo de la Interfaz/Vistas ---
 
@@ -1636,6 +1774,49 @@ function cfgOpenGuideIconPicker(idx) {
     cfgGuideEditingIndex = idx;
     cfgShopEditingIndex = null;
     showModal('modal-icon-picker');
+}
+
+// --- Exportar / Importar Datos ---
+function exportData() {
+    const data = {
+        courses: courses,
+        shop: shopItems,
+        guide: rewardSources,
+        points: pointValues,
+        version: '2.0-backup'
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `aventura-matematica-backup-${new Date().toISOString().split('T')[0]}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+function importData(event) {
+    const file = event.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if(confirm("⚠️ ¿Estás seguro de que quieres CARGAR esta copia? Se borrarán todos los datos actuales y se reemplazarán por los del archivo.")) {
+                if(data.courses) localStorage.setItem('gamificacion_cursos', JSON.stringify(data.courses));
+                if(data.shop) localStorage.setItem('gamificacion_shop', JSON.stringify(data.shop));
+                if(data.guide) localStorage.setItem('gamificacion_guide', JSON.stringify(data.guide));
+                if(data.points) localStorage.setItem('gamificacion_points', JSON.stringify(data.points));
+                alert("¡Datos cargados con éxito! La página se recargará.");
+                location.reload();
+            }
+        } catch(err) {
+            alert("Error al leer el archivo. Asegúrate de que sea una copia válida.");
+        }
+    };
+    reader.readAsText(file);
+    event.target.value = ''; // Reset input
 }
 
 // --- Sincronización Multi-Pestaña (Pizarra y Laptop) ---
