@@ -1,0 +1,1684 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aventura Matemática - Gamificación 2.0</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #F0F4F8; 
+  --theme-color: #40AAFE;
+  --theme-text: #FFFFFF;
+  
+  --cardBg: #FFFFFF; 
+  --text: #334155; 
+  --gold: #F59E0B;
+  --progressBg: #F1F5F9; 
+  --progressFill: #F59E0B; 
+  --rowBg: #FAFBFC; 
+  --btnBg: #FFFFFF; 
+  --btnBorder: #E2E8F0;
+  --btnShadow: #CBD5E1; 
+  --btnText: #64748B;
+  --topBarBorder: rgba(0,0,0,0.06); 
+  --modalBg: #FFFFFF; 
+  --subText: #94A3B8;
+  
+  --purplePrimary: #8B5CF6;
+  --purpleSecondary: #A78BFA;
+  --yellowPrimary: #FBBF24;
+  --yellowShadow: #F59E0B;
+  --pinkClose: #FB7185;
+}
+
+body.dark-mode {
+  --bg: #0F172A; 
+  --cardBg: #1E293B; 
+  --text: #F8FAFC; 
+  --progressBg: #334155; 
+  --progressFill: #FBBF24;
+  --rowBg: #1E293B; 
+  --btnBg: #1E293B; 
+  --btnBorder: #334155;
+  --btnShadow: #0F172A; 
+  --btnText: #CBD5E1; 
+  --topBarBorder: #334155; 
+  --modalBg: #1E293B;
+  --subText: #64748B; 
+}
+
+* { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
+body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; transition: background 0.4s; }
+h1, h2, h3 { text-align: center; margin: 5px 0 15px 0; font-weight: 900; }
+.hidden { display: none !important; }
+
+/* Contenedores de Vista */
+.view { max-width: 1400px; margin: 0 auto; padding: 10px 0; }
+
+#view-config, #view-roles, #view-courses {
+    background: var(--cardBg); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 15px; border: 2px solid var(--btnBg); position: relative;
+}
+
+/* Barra Superior del Dashboard */
+.top-bar { 
+  display: flex; flex-direction: column; align-items: stretch; gap: 10px;
+  margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.2);
+}
+@media (min-width: 1050px) { .top-bar { flex-direction: row; justify-content: space-between; align-items: center; } }
+.top-bar h2 { color: var(--text) !important; font-size: 1.8rem !important; margin:0 !important; text-shadow:none !important;}
+.top-bar h2 span { color: var(--subText) !important; opacity: 0.9; font-size: 1rem !important;}
+
+.top-bar-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100%; justify-content: center; }
+@media (min-width: 1050px) { .top-bar-controls { width: auto; justify-content: flex-end; flex: 1; } }
+
+.search-container { width: 100%; margin-bottom: 5px; }
+@media (min-width: 1050px) { .search-container { width: auto; min-width: 200px; margin-bottom: 0; margin-right: auto; margin-left: 15px; } }
+.search-container input { border-radius: 12px !important; border: 2px solid var(--purplePrimary) !important; padding: 8px 12px !important; background: #FFF !important; box-shadow:none !important;}
+
+.top-bar button { 
+  padding: 10px 18px !important; border-radius: 14px !important; border: 2px solid var(--btnBorder) !important; border-bottom-width: 4px !important; color: var(--btnText) !important;
+  font-weight: 800 !important; cursor: pointer; background: var(--btnBg) !important; box-shadow: none !important;
+  transition: 0.15s; font-size: 0.95rem !important; text-transform: uppercase;
+}
+.top-bar button:hover { transform: translateY(-2px); filter: brightness(0.95); }
+.top-bar button:active { border-bottom-width: 2px !important; transform: translateY(0); }
+.top-bar button.student-only, .top-bar button[onclick^="showShop"] { background: var(--yellowPrimary) !important; color: #78350F !important; border-color: #F59E0B !important; }
+.top-bar button[onclick="openConfig()"] { background: var(--purplePrimary) !important; color: #FFF !important; border-color: #6D28D9 !important; }
+
+/* Reglas de Visibilidad por Rol - Alta Especificidad para ganar a flex/grid !important */
+body[data-role="student"] .teacher-only { display: none !important; }
+body[data-role="teacher"] .student-only { display: none !important; }
+
+/* Grid de Tarjetas */
+.grid { display: grid; gap: 15px; padding: 5px; }
+body[data-role="student"] .grid { grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+body[data-role="teacher"] .grid { grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); }
+
+/* Tarjeta Estudiante Completamente Plana y Compacta */
+.row { 
+  display: flex; align-items: center; justify-content: space-between; 
+  padding: 16px 18px !important; 
+  border: 3px solid var(--theme-color) !important; 
+  border-bottom-width: 6px !important;
+  border-radius: 20px !important; 
+  background: var(--cardBg) !important;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.03) !important; 
+  transition: 0.2s; 
+  color: var(--text) !important;
+}
+.row:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important; }
+.row.selected { transform: scale(1.02); border-color: #3B82F6 !important; background: #EFF6FF !important; }
+.row.es-aliado { border-color: var(--yellowPrimary) !important; }
+
+.rank { font-weight: 900; font-size: 1.25rem; color: var(--subText); min-width: 35px; background: transparent; padding: 0; text-align: left; border: none; opacity: 0.8;}
+.name { font-weight: 900; font-size: 1.25rem; flex: 1; word-break: break-word; color: var(--text); padding-left:0;}
+.name-link { text-decoration: none; cursor: pointer; transition: 0.2s; }
+
+.gold-badge { background: var(--yellowPrimary) !important; border: none !important; border-radius: 12px !important; padding: 6px 12px !important; font-size: 1.1rem !important; box-shadow: none !important; color: #FFF !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap !important; flex-shrink: 0 !important; }
+.gold-badge svg { stroke: #FFF !important; width: 22px; height: 22px; fill: #FFF !important; }
+
+.level { font-weight: 900; padding: 4px 10px; border-radius: 10px; font-size: 0.8rem; text-transform: uppercase; background: var(--purplePrimary); color: #FFF; border: none; box-shadow: none;}
+.level-1 { background: #94A3B8; } /* Gris - Inicio */
+.level-2 { background: #4ADE80; } /* Verde - Aprendiz */
+.level-3 { background: #38BDF8; } /* Azul - Experimentado */
+.level-4 { background: #818CF8; } /* Indigo - Avanzado */
+.level-5 { background: #C084FC; color: #FFF; } /* Morado - Épico */
+.level-6 { background: #F472B6; color: #FFF; } /* Rosa - Mítico */
+.level-7 { background: #FB923C; color: #FFF; } /* Naranja - Divino */
+.level-8, .level-max { background: linear-gradient(135deg, #FACC15, #F59E0B); color: #FFF; box-shadow: 0 0 10px rgba(245, 158, 11, 0.5); text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+
+/* Progress Bar Compacta */
+.progress-col { flex: 1; display: flex; flex-direction: column; align-items: center; margin: 0 8px; position: relative; }
+.bar-bg { background: #E2E8F0; border-radius: 99px; height: 26px; width: 100%; position: relative; border: 2px solid rgba(0,0,0,0.05); overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 99px; background: linear-gradient(90deg, #F59E0B, #FB923C); transition: width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+.xp-val { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; font-weight: 900; font-size: 0.8rem; text-shadow: 0 0 3px rgba(0,0,0,0.8), 0 0 6px rgba(0,0,0,0.5); z-index: 2; pointer-events: none; }
+
+/* Botones Tarjeta (Planos y Juntos) */
+.btn-sm { font-weight: 900 !important; border: 2px solid var(--btnBorder) !important; border-bottom-width: 4px !important; border-radius: 12px !important; padding: 6px 12px !important; margin: 0 !important; cursor: pointer; transition: 0.15s; font-size: 0.95rem !important; box-shadow: none !important; background: var(--btnBg) !important; color: var(--btnText) !important; display:inline-flex; align-items:center; justify-content:center; }
+.btn-sm:hover { filter: brightness(0.95); transform: translateY(-2px); }
+.btn-sm:active { border-bottom-width: 2px !important; transform: translateY(0); }
+
+.b10 { color: #10B981 !important; background: #ECFDF5 !important; border-color: #A7F3D0 !important; }
+.b20 { color: #3B82F6 !important; background: #EFF6FF !important; border-color: #BFDBFE !important; }
+.b50 { color: #8B5CF6 !important; background: #F5F3FF !important; border-color: #DDD6FE !important; }
+
+body.dark-mode .b10 { background: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.3) !important; color: #34D399 !important; }
+body.dark-mode .b20 { background: rgba(59, 130, 246, 0.15) !important; border-color: rgba(59, 130, 246, 0.3) !important; color: #60A5FA !important; }
+body.dark-mode .b50 { background: rgba(139, 92, 246, 0.15) !important; border-color: rgba(139, 92, 246, 0.3) !important; color: #A78BFA !important; }
+
+.bali { background: var(--cardBg) !important; color: #94A3B8 !important; }
+.bali.active { background: #FFFBEB !important; color: var(--yellowPrimary) !important; border-color: #FDE68A !important; }
+.bshop { background: var(--text) !important; color: #FFF !important; border-color: transparent !important; }
+
+/* Botón Grande Plano */
+.btn-large { 
+  display: block; width: 100%; max-width: 300px; margin: 15px auto; 
+  padding: 16px; font-size: 1.4rem; font-weight: 900; 
+  background: var(--yellowPrimary) !important; color: #78350F !important; 
+  border: 3px solid #F59E0B !important; border-bottom-width: 6px !important; border-radius: 20px !important; 
+  cursor: pointer; box-shadow: none !important; transition: 0.15s; text-transform: uppercase;
+}
+.btn-large:hover { transform: translateY(-2px); filter: brightness(1.05); }
+.btn-large:active { border-bottom-width: 3px !important; transform: translateY(3px); }
+
+/* Modals Modernos Planos */
+.modal-overlay { 
+  position: fixed; top:0; left:0; width:100%; height:100%; 
+  background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; 
+  justify-content: center; z-index: 1000; padding:15px;
+}
+.modal-gen-content, .modal-content { 
+  background: var(--modalBg) !important; border-radius: 20px !important; width: 100%; position: relative;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important; color: var(--text); overflow: hidden;
+  border: none !important; padding: 0 0 20px 0 !important;
+}
+
+.modal-gen-content > h2:first-of-type, .modal-content > h2:first-of-type, .modal-content > h3:first-of-type, #view-config h2 { 
+    background: var(--purplePrimary) !important; padding: 20px !important; margin: 0 0 20px 0 !important; color: #FFF !important; border-bottom: none !important;
+    text-shadow: none !important; font-size: 1.8rem !important; border-radius: 20px 20px 0 0; text-align:center !important;
+}
+.modal-gen-content > *, .modal-content > * { padding-left: 20px; padding-right: 20px; }
+
+#view-config { padding: 0 !important; overflow: hidden; border: none; }
+#view-config > .top-bar { background: var(--purplePrimary); padding: 20px; margin: 0 0 20px 0; border-bottom: none; border-radius: 20px 20px 0 0; flex-direction:column; gap:10px; align-items:center; }
+#view-config > .top-bar h2 { background:transparent !important; border:none !important; margin:0 !important; padding:0 !important;}
+#view-config > div { padding-left: 20px; padding-right: 20px; }
+#view-config > div:last-child { padding-bottom: 20px; }
+#view-config h3 { color: var(--purplePrimary); text-transform: uppercase; font-size: 1.1rem; border-bottom: 2px solid var(--btnBg);}
+
+.close-btn { position: absolute; right: 10px; top: 10px; background: var(--pinkClose) !important; border: 4px solid #FFF !important; width: 40px; height: 40px; border-radius: 12px !important; font-size: 1.5rem !important; cursor: pointer; color: #FFF; font-weight: 900; box-shadow: none !important; display: flex; align-items: center; justify-content: center; padding: 0 !important; margin:0 !important; transition: 0.15s; line-height: 1;}
+.close-btn:hover { opacity: 0.9; transform: scale(1.05); }
+
+/* Listas */
+.history-list { text-align: left; padding: 0 !important; list-style: none; border-radius: 12px; border: 2px solid var(--btnShadow); background: var(--rowBg); margin: 0 20px 15px 20px !important;}
+.history-list li { padding: 12px; border-bottom: 2px solid var(--btnShadow); display: flex; justify-content: space-between; font-weight: 800; font-size: 0.95rem; }
+.history-list li:last-child { border-bottom: none; }
+
+.badge-btn { background: #FFF !important; border: 2px solid var(--btnShadow) !important; border-radius: 12px !important; padding: 10px 14px !important; cursor: pointer; color: var(--text) !important; font-weight: 900 !important; box-shadow: none !important; transition: 0.15s; }
+.badge-btn:hover { border-color: var(--purplePrimary) !important; }
+
+.badges-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px;}
+.badge-icon { background: var(--yellowPrimary) !important; color: #FFF !important; border: none !important; padding: 4px 10px !important; border-radius: 12px !important; font-size: 0.85rem !important; font-weight: 900 !important; box-shadow: none !important; }
+
+/* Config Inputs */
+input, select, textarea { border-radius: 10px !important; border: 2px solid var(--btnShadow) !important; padding: 10px 14px !important; font-weight: 900 !important; color: var(--text) !important; outline: none; background: #FFF !important; font-size:1rem !important; transition: 0.2s; box-shadow: none !important; box-sizing:border-box;}
+input:focus, select:focus, textarea:focus { border-color: var(--purplePrimary) !important; }
+
+/* Modal Podio y Subir Nivel */
+@keyframes slideUpFade { 0% { opacity: 0; transform: translateY(15px); } 100% { opacity: 1; transform: translateY(0); } }
+
+/* List Mode View Improvements */
+.grid.list-mode { grid-template-columns: 1fr !important; gap: 8px !important; }
+.grid.list-mode .row { 
+    display: grid !important;
+    grid-template-columns: 50px 240px 115px 105px 1fr 240px !important;
+    align-items: center !important; 
+    padding: 8px 15px !important; 
+    gap: 12px !important; 
+    min-height: 64px;
+    border-bottom-width: 4px !important;
+}
+.grid.list-mode .name { font-size: 1.1rem !important; margin: 0 !important; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; width: 100%; text-align: left !important; }
+.grid.list-mode .progress-col { min-width: 100px !important; margin: 0 !important; width: 100%; }
+body[data-role="teacher"] .grid.list-mode .actions { margin: 0 !important; display: flex !important; justify-content: flex-end; gap: 6px; width: auto !important; margin-top: 0 !important; }
+.grid.list-mode .gold-badge { min-width: 105px; width: auto !important; justify-content: center; margin: 0 !important; }
+.grid.list-mode .level { width: 95px; text-align: center; margin: 0 !important; }
+.grid.list-mode .rank { font-size: 1rem !important; opacity: 0.5; text-align: left; }
+
+/* Grid Mode Layout (Cards) - Compacto */
+.grid:not(.list-mode) .row { 
+    display: flex !important; 
+    flex-direction: column !important; 
+    min-height: unset !important; 
+    padding: 14px 16px !important; 
+    justify-content: flex-start !important; 
+    gap: 10px !important;
+}
+.grid:not(.list-mode) .name { font-size: 1.15rem !important; line-height: 1.2; text-align: left !important; flex: 1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; }
+.grid:not(.list-mode) .rank { font-size: 1.1rem !important; min-width: 35px; }
+body[data-role="teacher"] .grid:not(.list-mode) .actions { display: grid !important; grid-template-columns: repeat(4, 1fr) !important; width: 100%; gap: 8px !important; margin-top: 5px; }
+.grid:not(.list-mode) .progress-col { width: 100%; margin: 0 !important; flex: 1; }
+.grid:not(.list-mode) .gold-badge { font-size: 0.95rem !important; padding: 4px 10px !important; border-radius: 10px !important; }
+
+/* Cinema Mode */
+body.cinema-mode { background: #070B14 !important; }
+body.cinema-mode .top-bar, 
+body.cinema-mode #selection-bar, 
+body.cinema-mode #btn-dark-mode,
+body.cinema-mode .actions.teacher-only { display: none !important; }
+body.cinema-mode #view-dash { max-width: 100% !important; padding: 40px !important; }
+body.cinema-mode .grid { grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)) !important; gap: 40px !important; }
+body.cinema-mode .row { 
+    background: #1A2333 !important; 
+    border-width: 4px !important; 
+    border-bottom-width: 8px !important;
+    box-shadow: 0 0 20px rgba(0,0,0,0.4) !important;
+    transform: scale(1.05);
+}
+body.cinema-mode .name { color: #FFFFFF !important; font-size: 1.6rem !important; text-shadow: 0 2px 4px rgba(0,0,0,0.3) !important; }
+body.cinema-mode .rank { color: rgba(255,255,255,0.5) !important; font-size: 1.4rem !important; }
+body.cinema-mode .gold-badge { background: #0F172A !important; border-color: var(--gold) !important; color: var(--gold) !important; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3) !important; }
+body.cinema-mode .bar-bg { background: rgba(255,255,255,0.1) !important; height: 22px !important; border: none !important; }
+body.cinema-mode .xp-val { font-size: 0.9rem !important; }
+body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
+
+@keyframes iconScale { 0% { transform: scale(0.9); } 100% { transform: scale(1.1); } }
+.podium-showcase { display: flex; flex-direction: column; gap: 15px; }
+.podium-card { background: #FFF; border: 2px solid var(--theme-color); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: none !important; opacity: 0; animation: slideUpFade 0.4s ease-out forwards; }
+.podium-card-icon { font-size: 3rem; animation: iconScale 2s infinite alternate; width: 60px; text-align: center; }
+.podium-cat { font-size: 1.2rem; font-weight: 900; color: var(--theme-color); text-transform: uppercase; margin-bottom: 2px; }
+.podium-sub { font-size: 1rem; color: var(--subText); font-weight: 900; margin-bottom: 4px; }
+.podium-name { font-size: 1.5rem; font-weight: 900; color: var(--text); line-height: 1.1; margin-bottom: 6px; text-shadow: none; }
+.podium-stat { display: inline-flex; align-items:center; background: var(--theme-color); color: white; padding: 6px 14px; border-radius: 15px; font-weight: 900; font-size: 1rem; border: none; box-shadow:none !important;}
+
+#modal-levelup .levelup-content { 
+  background: var(--cardBg) !important; padding: 40px 25px !important; border-radius: 24px !important; text-align: center !important; width: 100% !important; max-width: 450px !important;
+  border: 6px solid #F59E0B !important; border-bottom-width: 10px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important; color: var(--text) !important;
+}
+#levelup-title { font-size: 2.8rem !important; color: var(--purplePrimary) !important; animation: iconScale 1s infinite alternate !important; text-shadow: none !important;}
+#levelup-name { font-size: 2.2rem !important; margin: 15px 0 !important; color: var(--text) !important; font-weight: 900 !important; }
+#levelup-info { font-size: 1.3rem !important; margin-bottom: 30px !important; color: var(--subText) !important; font-weight: 800 !important; }
+
+/* Fix selection bar */
+#selection-bar { background: #EFF6FF !important; border: 3px dashed #3B82F6 !important; padding: 12px 20px !important; border-radius: 20px !important; box-shadow: none !important; margin-bottom: 15px; flex-wrap: wrap; }
+#selection-bar span { color: #1E3A8A !important; font-size: 1.1rem !important; font-weight: 900 !important;}
+</style>
+</head>
+<body data-role="student">
+
+<!-- VISTA 1: Elegir Rol -->
+<div id="view-roles" class="view">
+    <h1>🚀 Aventura Matemática</h1>
+    <h2>Selecciona tu Modo de Acceso</h2>
+    <p style="text-align:center; color:var(--subText); margin-bottom:30px;">
+        El Modo Profesor permite editar. El Modo Estudiantes es de solo lectura (seguro para proyectores y pantallas interactivas).
+    </p>
+    <button class="btn-large" style="background:#FBBF24; color:#1E293B;" onclick="setRole('teacher')">👨‍🏫 Modo Profesor / Instructor</button>
+    <button class="btn-large" style="background:#8B5CF6; color:#FFF;" onclick="setRole('student')">🎓 Modo Estudiantes (Pizarra Activa)</button>
+</div>
+
+<!-- VISTA 2: Elegir Curso -->
+<div id="view-courses" class="view hidden">
+    <button class="close-btn" onclick="switchView('roles')" style="top: 15px; right: 15px; z-index: 10;" title="Volver al inicio">✖</button>
+    <h1>Seleccionar Curso</h1>
+    
+    <!-- Sección Profesor: Agregar Curso -->
+    <div class="teacher-only" style="max-width: 500px; margin: 0 auto 30px; background: var(--rowBg); padding: 20px; border-radius: 20px; border: 2px dashed var(--purplePrimary);">
+        <h3 style="margin-top:0; color:var(--purplePrimary); font-size:1.2rem;">➕ Crear Nuevo Curso</h3>
+        <div style="display:flex; gap:10px;">
+            <input type="text" id="new-course-name" placeholder="Ej: 7° Básico A" style="flex:1; border:2px solid var(--btnShadow);" onkeydown="if(event.key==='Enter') addCourseFromMenu()">
+            <button class="btn-sm b20" onclick="addCourseFromMenu()" style="padding:10px 20px; font-size:1rem;">CREAR</button>
+        </div>
+    </div>
+
+    <div id="course-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; justify-content: center; padding: 10px;"></div>
+</div>
+
+<!-- VISTA 3: Pizarra Principal -->
+<div id="view-dash" class="view hidden">
+    <div class="top-bar">
+        <h2 id="course-title" style="margin:0; font-size:1.8rem; text-align:left;">--- <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span></h2>
+        
+        <div class="top-bar-controls" style="justify-content:center;">
+            <button onclick="switchView('courses')" title="Volver al Menú de Cursos" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+            <button id="btn-show-guide" onclick="showGuide()" title="Manual de Puntos (Cómo ganar XP)" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía</button>
+            <button onclick="showShop()" title="Tienda de Recompensas" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Tienda</button>
+            <button onclick="showPodium()" title="Salón de la Fama" style="display:flex; align-items:center; justify-content:center; gap:6px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"></path><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"></path><path d="M4 22h16"></path><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"></path><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"></path><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"></path></svg></button>
+            <button id="btn-view-toggle" onclick="toggleViewMode()" title="Cambiar Vista (Cuadrícula / Lista)" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;">
+                <svg id="svg-view-grid" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <svg id="svg-view-list" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+
+            <!-- Botones de Ordenar -->
+            <button id="btn-sort-xp" onclick="changeSort('xp')" title="Ordenar por Puntos (Ranking)" style="display:flex; align-items:center; justify-content:center; padding: 10px 14px !important; background: var(--yellowPrimary) !important; color: #78350F !important; border-color: #F59E0B !important; gap: 4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
+                <span style="font-size:0.8rem; font-weight:900;">PTS</span>
+            </button>
+            <button id="btn-sort-alpha" onclick="changeSort('alpha')" title="Ordenar Alfabéticamente (A-Z)" style="display:flex; align-items:center; justify-content:center; padding: 10px 14px !important; gap: 4px;">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/><path d="M3 16l4 4 4-4"/><path d="M7 20V4"/></svg>
+                <span style="font-size:0.8rem; font-weight:900;">A-Z</span>
+            </button>
+            
+            <div class="search-container">
+                <input type="text" id="search-input" placeholder="🔍 Buscar alumno..." style="padding:12px 15px; border-radius:10px; border:2px solid var(--btnShadow); background:var(--bg); color:var(--text); font-family:'Nunito'; font-weight: 800; width: 100%; outline:none; transition: 0.2s;" oninput="onSearch(this.value)">
+            </div>
+            
+            <button id="btn-toggle-role" onclick="toggleRole()" title="Cambiar Vista">👀 Modo Estudiantes</button>
+            <button onclick="toggleCinemaMode()" title="Modo Pantalla Completa / Cinema" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M7 12h10"/><path d="M10 9v6"/><path d="M14 9v6"/></svg></button>
+            <button class="teacher-only" onclick="openConfig()" title="Configuración" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+        </div>
+    </div>
+    
+    <div id="selection-bar" class="teacher-only hidden" style="background:var(--selectionBarBg); padding:10px 20px; border-radius:12px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; border: 2px dashed #3B82F6; transition: background 0.3s;">
+        <span id="selection-count" style="font-weight:900; color:var(--selectionBarText); transition: color 0.3s;">0 estudiantes seleccionados</span>
+        <div style="display:flex; gap:10px; flex-wrap:wrap;">
+            <button class="btn-sm b10" onclick="addXPToSelected(pointValues[0])">+<span id="txt-pt1-mass"></span> a todos</button>
+            <button class="btn-sm b20" onclick="addXPToSelected(pointValues[1])">+<span id="txt-pt2-mass"></span> a todos</button>
+            <button class="btn-sm b50" onclick="addXPToSelected(pointValues[2])">+<span id="txt-pt3-mass"></span> a todos</button>
+            <button class="btn-sm" style="background:var(--btnBg); color:var(--text);" onclick="clearSelection()">Desmarcar</button>
+        </div>
+    </div>
+
+    <div id="list-container" class="grid">
+        <!-- Renderizado Vía JS -->
+    </div>
+</div>
+
+
+
+<!-- Modal Perfil Estudiante -->
+<div id="modal-profile" class="modal-overlay hidden">
+    <div class="modal-gen-content" style="max-width: 600px; max-height: 90vh; display: flex; flex-direction: column; padding: 0 !important;">
+        <button class="close-btn" onclick="hideModal('modal-profile')" style="z-index: 10;">✖</button>
+        <h2 id="prof-name" style="text-align:center; padding: 20px !important; margin: 0 !important; flex-shrink: 0; z-index: 1;">Nombre</h2>
+        
+        <div style="flex: 1; overflow-y: auto; padding: 20px; position:relative;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; background:var(--btnBg); padding:15px; border-radius:12px; border:2px solid var(--btnShadow);">
+                <span id="prof-level" class="level level-max">Nivel X</span>
+                <div style="text-align:right;">
+                    <div id="prof-xp" style="font-weight:900; font-size:1.1rem; color:var(--btnText); text-shadow:none;">0 XP Total</div>
+                    <div id="prof-gold" style="font-weight:900; font-size:1.3rem; color:var(--yellowPrimary); margin-top:4px;">🪙 0 Oro</div>
+                </div>
+            </div>
+            
+            <div class="bar-bg" style="margin-bottom:20px; height:24px;">
+                <div id="prof-bar" class="bar-fill" style="width: 0%"></div>
+                <div id="prof-bar-text" class="xp-val" style="margin-top:-22px; text-align:center; font-size:1rem;"></div>
+            </div>
+            
+            <h3 style="margin-bottom:10px;">🏅 Insignias Ganadas</h3>
+            <div id="prof-badges" class="badges-container" style="margin-bottom:20px;"></div>
+            
+            <h3 style="margin-bottom:10px;">📜 Historial</h3>
+            <ul id="prof-history" class="history-list" style="max-height: 25vh; overflow-y: auto;"></ul>
+            
+            <div class="teacher-only" style="border-top: 2px solid var(--topBarBorder); padding-top:15px; margin-top:15px;">
+                <h4 style="margin-top:0; color:#F59E0B;">Insignias de Hoy (+20 XP)</h4>
+                <div id="prof-badge-buttons" style="display:flex; flex-wrap:wrap; gap:8px;">
+                    <!-- Dinámico por JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Tienda -->
+<div id="modal-shop" class="modal-overlay hidden">
+    <div class="modal-gen-content" style="max-width: 600px;">
+        <button class="close-btn" onclick="hideModal('modal-shop')">✖</button>
+        <h2>🛒 Tienda de Recompensas</h2>
+        <p id="shop-subtitle" style="color:var(--subText); margin-bottom:20px; line-height:1.4;">Catálogo de recompensas.</p>
+        <div id="shop-content" style="padding: 20px; max-height: 70vh; overflow-y: auto;">
+            <!-- Renderizado por JS: Inventario + Grid de Tienda -->
+        </div>
+    </div>
+</div>
+
+<!-- Modal Podio / Destacados -->
+<div id="modal-podium" class="modal-overlay hidden">
+    <div class="modal-gen-content" style="max-width: 650px;">
+        <button class="close-btn" onclick="hideModal('modal-podium')">✖</button>
+        <h2>🏆 Salón de la Fama 🏆</h2>
+        <p style="color:var(--subText); font-size:1.1rem; margin-bottom:25px; text-align:center; font-weight:800;">¡Reconocimiento a los protagonistas de esta clase!</p>
+        <div id="podium-container" style="margin-bottom: 25px; max-height: 55vh; overflow-y: auto; overflow-x: hidden; padding: 10px;"></div>
+        <button class="btn-large teacher-only" style="background:#EF4444; margin:0 auto;" onclick="resetClassSession()">Reiniciar Sesión (Nueva Clase)</button>
+    </div>
+</div>
+
+<!-- Modal Nivel Superado -->
+<div id="modal-levelup" class="modal-overlay hidden">
+    <div class="levelup-content">
+        <h1 id="levelup-title">¡NUEVO NIVEL! 🚀</h1>
+        <h2 id="levelup-name">Nombre</h2>
+        <p id="levelup-info">Ha alcanzado el <span id="levelup-level-name" class="level level-max" style="font-size: 1.5rem; border-radius: 12px; padding: 8px 16px;">Nivel X</span></p>
+        <button class="btn-large" style="margin-top: 10px; max-width: 250px; background: #3B82F6;" onclick="hideLevelUp()">¡Increíble!</button>
+    </div>
+</div>
+
+
+<!-- Modal Guía de Puntos -->
+<div id="modal-guide" class="modal-overlay hidden">
+    <div class="modal-gen-content" style="max-width: 800px; width: 95%;">
+        <button class="close-btn" onclick="hideModal('modal-guide')">✖</button>
+        <h2>📜 Manual del Aventurero</h2>
+        <p style="text-align:center; color:var(--subText); margin-bottom:25px; font-weight:800;">¡Descubre cómo ganar puntos de experiencia y subir de nivel!</p>
+        <div id="guide-content" style="padding:10px 20px 20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; max-height:65vh; overflow-y:auto;">
+            <!-- Renderizado por JS -->
+        </div>
+    </div>
+</div>
+<div id="view-config" class="view hidden">
+    <button class="close-btn" onclick="switchConfigToDash()" style="top: 15px; right: 15px; z-index: 10;" title="Volver a la Pizarra">✖</button>
+    <div class="top-bar" style="padding-top: 5px;">
+        <h2 style="margin:0; font-size:1.8rem; text-align:center;">⚙️ Configuración del Profesor <span style="font-weight:400; font-size:1.1rem; color:#FFF; opacity:0.9; display:block; margin-top:4px;">Administrar la clase</span></h2>
+    </div>
+    
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <!-- Cursos -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow);">
+            <h3 style="margin-top:0;">📚 Gestión de Cursos</h3>
+            <div style="display:flex; gap:10px; margin-bottom:15px;">
+                <input type="text" id="cfg-new-course" placeholder="Nombre (Ej: 3° Medio)" style="flex:1; min-width:0; padding:10px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold;" onkeydown="if(event.key==='Enter') cfgAddCourse()">
+                <button class="btn-sm b20" style="padding:10px 15px; white-space:nowrap; flex-shrink:0;" onclick="cfgAddCourse()">+ Añadir</button>
+            </div>
+            <ul id="cfg-course-list" style="list-style:none; padding:0; margin:0; max-height:220px; overflow-y:auto; background:var(--cardBg); border-radius:12px; border:2px solid var(--btnShadow);"></ul>
+        </div>
+        
+        <!-- Puntos -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow);">
+            <h3 style="margin-top:0;">⭐ Botones de Puntos (XP)</h3>
+            <p style="font-size:0.9rem; color:var(--subText);">Valores de XP para las tarjetas en la pizarra.</p>
+            <div style="display:flex; gap:10px; margin-bottom:10px; align-items:flex-end;">
+                <div style="flex:1; display:flex; flex-direction:column; gap:5px;"><label style="font-size:0.8rem; font-weight:bold;">Botón Pequeño</label><input type="number" id="cfg-pt-1" class="cfg-pt" style="width:100%; min-width:0; padding:10px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; font-size:1.1rem; text-align:center;" onchange="cfgSavePoints()"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:5px;"><label style="font-size:0.8rem; font-weight:bold;">Botón Mediano</label><input type="number" id="cfg-pt-2" class="cfg-pt" style="width:100%; min-width:0; padding:10px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; font-size:1.1rem; text-align:center;" onchange="cfgSavePoints()"></div>
+                <div style="flex:1; display:flex; flex-direction:column; gap:5px;"><label style="font-size:0.8rem; font-weight:bold;">Botón Grande</label><input type="number" id="cfg-pt-3" class="cfg-pt" style="width:100%; min-width:0; padding:10px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; font-size:1.1rem; text-align:center;" onchange="cfgSavePoints()"></div>
+            </div>
+        </div>
+
+        <!-- Estudiantes -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); grid-column: 1 / -1;">
+            <h3 style="margin-top:0;">🎓 Gestión Estudiantes</h3>
+            <select id="cfg-course-sel" style="width:100%; max-width:400px; padding:10px; margin-bottom:15px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; font-size:1rem;" onchange="cfgRenderStudents()"></select>
+            
+            <div style="display:flex; gap:10px; margin-bottom:15px; align-items:flex-start;">
+                <textarea id="cfg-new-students" placeholder="Pegar lista de estudiantes o escribir uno a la vez...&#10;Juan, Pedro, Marta... o uno por línea" style="flex:1; max-width:600px; height:80px; padding:10px; border-radius:8px; border:2px solid var(--btnShadow); font-family:inherit;"></textarea>
+                <button class="btn-sm b10" style="padding:10px 20px; height:80px;" onclick="cfgAddStudentsLot()">+ Añadir a la Lista</button>
+            </div>
+            
+            <div id="cfg-student-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap:12px; max-height:350px; overflow-y:auto; padding-right:10px;"></div>
+        </div>
+
+        <!-- Tienda -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); grid-column: 1 / -1;">
+            <h3 style="margin-top:0;">🛒 Tienda de Recompensas</h3>
+            <p style="font-size:0.95rem; color:var(--subText); margin-top:0;">Haz clic en el icono cuadrado de cada tarjeta para abrir la biblioteca de iconos y elegir uno.</p>
+            <div id="cfg-shop-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:15px; margin-bottom:20px;"></div>
+            <button class="btn-sm b10" style="padding:12px 20px;" onclick="cfgAddShopItem()">+ Agregar Recompensa a la Tienda</button>
+        </div>
+
+        <!-- Manual de Puntos (Guía) -->
+        <div style="background:var(--rowBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); grid-column: 1 / -1;">
+            <h3 style="margin-top:0;">📜 Manual de Puntos (Cómo ganar XP)</h3>
+            <p style="font-size:0.95rem; color:var(--subText); margin-top:0;">Define qué acciones dan puntos y cuánta XP otorgan para que los alumnos lo vean en la Guía.</p>
+            <div id="cfg-guide-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:15px; margin-bottom:20px;"></div>
+            <button class="btn-sm b20" style="padding:12px 20px;" onclick="cfgAddGuideItem()">+ Agregar Regla al Manual</button>
+        </div>
+        
+    </div>
+</div>
+
+<!-- Selector de Iconos Flotante -->
+<div id="modal-icon-picker" class="modal-overlay hidden" style="z-index: 10000; padding: 10px;">
+    <div class="modal-content" style="max-width:400px; width: 100%; padding: 20px;">
+        <h3>Elige un Icono</h3>
+        <div id="icon-picker-grid" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(45px, 1fr)); gap:10px; font-size:2.2rem; text-align:center; justify-content: center;"></div>
+        <button class="btn-large" style="width:100%; margin-top:20px; background:var(--topBarBorder); color:var(--text);" onclick="hideModal('modal-icon-picker')">Cerrar</button>
+    </div>
+</div>
+
+<!-- Botón Flotante Modo Oscuro -->
+<button id="btn-dark-mode" onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; width: 55px; height: 55px; border-radius: 50%; border: none; background: var(--cardBg); color: var(--text); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; display: flex; align-items: center; justify-content: center;">
+    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+</button>
+
+<script>
+const svgProfile = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
+const svgShop = `<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
+const svgStar = `<svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>`;
+const svgMoon = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>`;
+const svgSun = `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>`;
+
+let pointValues = [5, 10, 30];
+let shopItems = [
+    { name: 'Elegir Asiento', cost: 100, icon: '🪑' },
+    { name: 'Música en Clase', cost: 150, icon: '🎵' },
+    { name: 'Pase de Tiempo Libre', cost: 250, icon: '⏱️' },
+    { name: 'Ticket No Tarea', cost: 500, icon: '🎫' }
+];
+
+let rewardSources = [
+    { title: 'Participación Estelar', desc: 'Levantar la mano y participar activamente en clase.', points: 10, icon: '🗣️' },
+    { title: 'Tarea Completa', desc: 'Entregar tus deberes a tiempo y con buena calidad.', points: 20, icon: '📚' },
+    { title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹' },
+    { title: 'Ayudante Pro', desc: 'Colaborar con el profesor y ayudar a repartir materiales.', points: 15, icon: '🤝' },
+    { title: 'Compañerismo', desc: 'Ayudar a un compañero que tenga dudas o dificultades.', points: 10, icon: '💖' },
+    { title: 'Super Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫' }
+];
+
+const libIcons = ['🪑','🎵','⏱️','🎫','🎮','🍬','📚','🏆','⭐','🍕','🎨','🎲','🧩','🧸','📱','💻','🏀','⚽','🍎','💡','🌟','⚡','🔮','👑','🗣️','🧹','🤝','💖','🤫','🚀','✅','📝','📅','🎒','🥛','🥗'];
+let cfgShopEditingIndex = null;
+let cfgGuideEditingIndex = null;
+
+if(localStorage.getItem('gamificacion_points')) {
+    try { pointValues = JSON.parse(localStorage.getItem('gamificacion_points')); } catch(e){}
+}
+if(localStorage.getItem('gamificacion_shop')) {
+    try { shopItems = JSON.parse(localStorage.getItem('gamificacion_shop')); } catch(e){}
+}
+if(localStorage.getItem('gamificacion_guide')) {
+    try { rewardSources = JSON.parse(localStorage.getItem('gamificacion_guide')); } catch(e){}
+}
+
+
+// --- Configuración y Datos ---
+function toggleDarkMode() {
+    document.body.classList.toggle('dark-mode');
+    const isDark = document.body.classList.contains('dark-mode');
+    localStorage.setItem('aventura_dark_mode', isDark);
+    document.getElementById('btn-dark-mode').innerHTML = isDark ? svgSun : svgMoon;
+}
+
+if(localStorage.getItem('aventura_dark_mode') === 'true') {
+    document.body.classList.add('dark-mode');
+    document.getElementById('btn-dark-mode').innerHTML = svgSun;
+} else {
+    document.getElementById('btn-dark-mode').innerHTML = svgMoon;
+}
+
+function getLevelInfo(xp) {
+    const level = Math.floor((-1 + Math.sqrt(1 + 8 * (Math.max(0, xp) / 25 + 1))) / 2);
+    const xpNeededForCurrentLevel = 12.5 * level * level + 12.5 * level - 25;
+    const xpInLevel = Math.max(0, xp - xpNeededForCurrentLevel);
+    const xpForNextLevel = 25 * level + 25;
+    const pct = (xpInLevel / xpForNextLevel) * 100;
+    return { level, xpInLevel: Math.floor(xpInLevel), xpForNextLevel, pct };
+}
+
+let role = 'student'; // 'teacher' o 'student'
+let currentCourse = null;
+updateMassXPText();
+let selectedStudents = new Set(); // conjunto de IDs seleccionados
+let searchTerm = '';
+let currentProfileId = null;
+let currentShopStudentId = null;
+let viewMode = 'grid'; // 'grid' o 'list'
+let sortMode = 'xp'; // 'xp' o 'alpha'
+
+function toggleViewMode() {
+    viewMode = viewMode === 'grid' ? 'list' : 'grid';
+    document.getElementById('svg-view-grid').classList.toggle('hidden');
+    document.getElementById('svg-view-list').classList.toggle('hidden');
+    renderList();
+}
+
+function changeSort(mode) {
+    sortMode = mode;
+    // Dar estilo visual al botón seleccionado
+    const btnXp = document.getElementById('btn-sort-xp');
+    const btnAlpha = document.getElementById('btn-sort-alpha');
+    if(mode === 'xp') {
+        btnXp.style.background = 'var(--yellowPrimary)';
+        btnXp.style.color = '#78350F';
+        btnXp.style.borderColor = '#F59E0B';
+        btnAlpha.style.background = 'var(--btnBg)';
+        btnAlpha.style.color = 'var(--btnText)';
+        btnAlpha.style.borderColor = 'var(--btnBorder)';
+    } else {
+        btnAlpha.style.background = 'var(--yellowPrimary)';
+        btnAlpha.style.color = '#78350F';
+        btnAlpha.style.borderColor = '#F59E0B';
+        btnXp.style.background = 'var(--btnBg)';
+        btnXp.style.color = 'var(--btnText)';
+        btnXp.style.borderColor = 'var(--btnBorder)';
+    }
+    renderList();
+}
+
+// (Shop Items moved up)
+
+function prepareStudent(s) {
+    if(!s.history) s.history = [];
+    if(!s.badges) s.badges = [];
+    if(!s.inventory) s.inventory = [];
+    if(typeof s.sessionXP === 'undefined') s.sessionXP = 0;
+    if(!s.sessionBadges) s.sessionBadges = [];
+    if(typeof s.gold === 'undefined') s.gold = Math.max(0, s.xp); // Migración de datos automática
+    return s;
+}
+
+function onSearch(val) {
+    searchTerm = val.trim().toLowerCase();
+    renderList();
+}
+
+// Lista de nombres ficticios para generar 40 alumnos rápidamente
+const fakeNames = "Agustín Silva,Martina González,Lucas Muñoz,Sofía Rojas,Matías Díaz,Valentina Pérez,Joaquín Soto,Isidora Contreras,Tomás Silva,Emilia Martínez,Vicente Sepúlveda,Florencia Morales,Maximiliano Rodríguez,Josefa López,Felipe Fuentes,Antonella Hernández,Benjamín Torres,Ignacia Araya,Sebastián Flores,Catalina Espinoza,Martín Valenzuela,Javiera Castillo,Diego Tapia,Fernanda Reyes,Nicolás Gutiérrez,Constanza Castro,Renato Pizarro,Camila Álvarez,Bastián Vásquez,Amanda Sánchez,Gabriel Fernández,Daniela Gómez,Alonso Cortés,Antonia Herrera,Mateo Núñez,Romina Jara,Simón Vergara,Pía Rivera,Pedro Figueroa,Paula Riquelme".split(",");
+
+// Almacén de Cursos y Estudiantes
+let courses = {
+    // 6° C ya precargado con los 40 estudiantes fake, con niveles y XP variados para testear
+    "6° C": fakeNames.map((n, i) => ({ 
+        id: i, 
+        name: n, 
+        xp: Math.floor(Math.random() * 850), // Empiezan entre 0 y 850 XP
+        aliado: false 
+    })),
+    "5° A": [], // Curso vacío de ejemplo
+    "5° B": []
+};
+
+// Cargar desde LocalStorage si existe (para sincronizar pestañas)
+const localData = localStorage.getItem('gamificacion_cursos');
+if(localData) {
+    try { courses = JSON.parse(localData); } catch(e){}
+}
+
+function saveData() {
+    localStorage.setItem('gamificacion_cursos', JSON.stringify(courses));
+}
+
+// --- Manejo de la Interfaz/Vistas ---
+
+function setRole(r) {
+    role = r;
+    selectedStudents.clear();
+    document.body.setAttribute('data-role', role);
+    switchView('courses');
+    renderCourses();
+}
+
+function toggleRole() {
+    role = role === 'teacher' ? 'student' : 'teacher';
+    selectedStudents.clear();
+    document.body.setAttribute('data-role', role);
+    renderList(); // Refresca botones y titulos
+}
+
+function switchView(vId) {
+    ['roles', 'courses', 'dash', 'config'].forEach(id => document.getElementById('view-'+id).classList.add('hidden'));
+    document.getElementById('view-'+vId).classList.remove('hidden');
+}
+
+// --- Renderizados ---
+
+function renderCourses() {
+    const cb = document.getElementById('course-buttons');
+    cb.innerHTML = '';
+    Object.keys(courses).forEach(c => {
+        const container = document.createElement('div');
+        container.style.position = 'relative';
+        container.style.width = '100%';
+        container.style.maxWidth = '300px';
+        container.style.margin = '0 auto';
+        container.style.display = 'flex';
+        container.style.flexDirection = 'column';
+
+        const b = document.createElement('button');
+        b.className = 'btn-large';
+        b.style.margin = '0';
+        b.style.width = '100%';
+        b.style.padding = '20px 10px';
+        b.innerText = c + " (" + courses[c].length + " est.)";
+        b.onclick = () => { 
+            currentCourse = c; 
+            selectedStudents.clear();
+            searchTerm = '';
+            const searchInput = document.getElementById('search-input');
+            if(searchInput) searchInput.value = '';
+            initDash(); 
+        };
+        
+        container.appendChild(b);
+
+        if (role === 'teacher') {
+            const delBtn = document.createElement('button');
+            delBtn.innerHTML = '✖';
+            delBtn.className = 'close-btn';
+            delBtn.style.top = '-8px';
+            delBtn.style.right = '-8px';
+            delBtn.style.width = '32px';
+            delBtn.style.height = '32px';
+            delBtn.style.fontSize = '1.1rem';
+            delBtn.style.borderWidth = '3px';
+            delBtn.style.zIndex = '5';
+            delBtn.title = 'Eliminar curso entero';
+            delBtn.onclick = (e) => {
+                e.stopPropagation();
+                if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso.`)) { 
+                    delete courses[c]; 
+                    if(currentCourse === c) currentCourse = null; 
+                    saveData(); 
+                    renderCourses(); 
+                }
+            };
+            container.appendChild(delBtn);
+        }
+
+        cb.appendChild(container);
+    });
+}
+
+function addCourseFromMenu() {
+    const input = document.getElementById('new-course-name');
+    const c = input.value.trim();
+    if(!c) return;
+    if(courses[c]) {
+        alert("El curso ya existe.");
+        return;
+    }
+    courses[c] = [];
+    saveData();
+    renderCourses();
+    input.value = '';
+}
+
+function initDash() {
+    updateMassXPText();
+    switchView('dash');
+    renderList();
+}
+
+function renderList() {
+    if(!currentCourse) return;
+    
+    // Configura Textos de Header según el estado
+    document.getElementById('course-title').innerHTML = `${currentCourse} - <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span>`;
+    document.getElementById('btn-toggle-role').innerText = role === 'teacher' ? '👀 Modo Estudiantes' : '✏️ Modo Profesor';
+
+    const list = courses[currentCourse];
+    
+    // Mostrar/ocultar barra de selección
+    const selectionBar = document.getElementById('selection-bar');
+    if(selectionBar) {
+        if(role === 'teacher' && selectedStudents.size > 0) {
+            selectionBar.classList.remove('hidden');
+            document.getElementById('selection-count').innerText = `${selectedStudents.size} ${selectedStudents.size === 1 ? 'estudiante seleccionado' : 'estudiantes seleccionados'}`;
+        } else {
+            selectionBar.classList.add('hidden');
+        }
+    }
+    
+    // ¡La magia de la clasificación!
+    // Primero guardamos los puestos oficiales según el XP global
+    list.sort((a, b) => b.xp - a.xp);
+    list.forEach((s, i) => s.rankPos = i + 1); // Guardamos su puesto # real
+
+    // Ahora ordenamos según lo seleccionado por el usuario
+    if (sortMode === 'alpha') {
+        list.sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }));
+    } else {
+        list.sort((a, b) => b.xp - a.xp);
+    }
+    
+    const container = document.getElementById('list-container');
+    container.className = `grid ${viewMode === 'list' ? 'list-mode' : ''}`;
+    container.innerHTML = ''; // Limpiar grilla
+
+    if(list.length === 0) {
+        container.innerHTML = '<p style="text-align:center; grid-column:1/-1; padding:20px; color:var(--subText);">No hay estudiantes. ¡Cambia al Modo Profesor y añade la lista del curso!</p>';
+        return;
+    }
+    
+    // Filtrar lista según la búsqueda pero preservar el ranking real
+    const filteredList = list
+        .map((s, idx) => ({ s: prepareStudent(s), originalIdx: idx }))
+        .filter(item => item.s.name.toLowerCase().includes(searchTerm));
+
+    if(filteredList.length === 0) {
+        container.innerHTML = '<p style="text-align:center; grid-column:1/-1; padding:20px; color:var(--subText); font-size: 1.2rem; font-weight:800;">No se encontró ningún estudiante llamado "' + searchTerm + '"</p>';
+        return;
+    }
+    
+    // Generar Filas
+    filteredList.forEach((item) => {
+        const s = item.s;
+        const idx = item.originalIdx;
+        const { level, xpInLevel, xpForNextLevel, pct } = getLevelInfo(s.xp);
+        
+        let rankClass = "rank";
+        if (s.rankPos === 1) rankClass += " rank-1";
+        else if (s.rankPos === 2) rankClass += " rank-2";
+        else if (s.rankPos === 3) rankClass += " rank-3";
+
+        // Clases dinámicas por si es aliado o seleccionado
+        const isSelected = selectedStudents.has(s.id);
+        const finalRowClass = `${s.aliado ? 'es-aliado' : ''} ${isSelected ? 'selected' : ''}`.trim();
+        const gradeClass = level <= 8 ? `level-${level}` : 'level-max';
+
+        const gradeColors = { 1:'#94A3B8', 2:'#2DD4BF', 3:'#60A5FA', 4:'#A78BFA', 5:'#F472B6', 6:'#FBBF24', 7:'#FB923C', 8:'#EF4444'};
+        const stripColor = level <= 8 ? gradeColors[level] : '#EF4444';
+        const hex = stripColor.replace('#','');
+        const r = parseInt(hex.substring(0,2), 16), g = parseInt(hex.substring(2,4), 16), b = parseInt(hex.substring(4,6), 16);
+        const bgAlpha = document.body.classList.contains('dark-mode') ? 0.12 : 0.05;
+        const tintBg = `rgba(${r},${g},${b},${bgAlpha})`;
+        const dynamicStyles = `background: ${tintBg} !important; border-color: ${stripColor} !important;`;
+
+        if (viewMode === 'list') {
+            container.innerHTML += `
+                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles} cursor:${role==='teacher'?'pointer':'default'};" onclick="if(role==='teacher') toggleSelection(${s.id})">
+                    <span class="${rankClass}">#${s.rankPos}</span>
+                    <span class="name name-link ${s.aliado ? 'es-aliado' : ''}" onclick="event.stopPropagation(); showProfile(${s.id})">
+                        ${s.aliado ? '⭐ ' : ''}${s.name}
+                    </span>
+                    <div class="gold-badge" style="background:#FEF3C7; border:2px solid var(--gold); border-radius:10px; color:#D97706; font-weight:900; display:flex; gap:5px; align-items:center;">
+                        🪙 ${s.gold}
+                    </div>
+                    <span class="level ${gradeClass}">Nivel ${level}</span>
+                    <div class="progress-col">
+                        <div class="bar-bg"><div class="bar-fill" style="width: ${pct}%"></div></div>
+                        <div class="xp-val">${xpInLevel}/${xpForNextLevel}</div>
+                    </div>
+                    <div class="actions teacher-only">
+                        <button class="btn-sm b10" style="width:44px; height:44px;" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[0]})">+${pointValues[0]}</button>
+                        <button class="btn-sm b20" style="width:44px; height:44px;" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[1]})">+${pointValues[1]}</button>
+                        <button class="btn-sm b50" style="width:44px; height:44px;" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[2]})">+${pointValues[2]}</button>
+                        <button class="btn-sm bshop" style="width:40px; height:40px; padding:0;" onclick="event.stopPropagation(); showShop(${s.id})">${svgShop}</button>
+                    </div>
+                </div>`;
+        } else {
+            container.innerHTML += `
+                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles} cursor:${role==='teacher'?'pointer':'default'};" onclick="if(role==='teacher') toggleSelection(${s.id})">
+                    <!-- Fila 1: Rango, Nombre y Oro -->
+                    <div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px;">
+                        <div style="display:flex; align-items:center; gap:8px; flex:1; overflow:hidden;">
+                            <span class="${rankClass}">#${s.rankPos}</span>
+                            <span class="name name-link ${s.aliado ? 'es-aliado' : ''}" onclick="event.stopPropagation(); showProfile(${s.id})">
+                                ${s.aliado ? '⭐ ' : ''}${s.name}
+                            </span>
+                        </div>
+                        <div class="gold-badge" style="background:#FEF3C7; border:2px solid var(--gold); color:#D97706; font-weight:900;">🪙 ${s.gold}</div>
+                    </div>
+                    
+                    <!-- Fila 2: Nivel y Barra de Experiencia -->
+                    <div style="display:flex; align-items:center; width:100%; gap:12px; margin: 2px 0;">
+                        <span class="level ${gradeClass}" style="flex-shrink:0;">Nivel ${level}</span>
+                        <div class="progress-col">
+                            <div class="bar-bg"><div class="bar-fill" style="width: ${pct}%"></div></div>
+                            <div class="xp-val">${xpInLevel}/${xpForNextLevel}</div>
+                        </div>
+                    </div>
+
+                    <!-- Fila 3: Botones de Acción -->
+                    <div class="actions teacher-only">
+                        <button class="btn-sm b10" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[0]})">+${pointValues[0]}</button>
+                        <button class="btn-sm b20" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[1]})">+${pointValues[1]}</button>
+                        <button class="btn-sm b50" onclick="event.stopPropagation(); addXP(${s.id}, ${pointValues[2]})">+${pointValues[2]}</button>
+                        <button class="btn-sm bshop" style="padding:0;" onclick="event.stopPropagation(); showShop(${s.id})">${svgShop}</button>
+                    </div>
+                </div>`;
+        }
+    });
+}
+
+// --- Lógica Gamificada ---
+
+function toggleSelection(id) {
+    if(role !== 'teacher') return;
+    if(selectedStudents.has(id)) {
+        selectedStudents.delete(id);
+    } else {
+        selectedStudents.add(id);
+    }
+    renderList();
+}
+
+function addXPToSelected(amount) {
+    if(amount <= 0 || selectedStudents.size === 0) return;
+    let studentsAssigned = [];
+    let leveledUpStudents = [];
+    
+    selectedStudents.forEach(id => {
+        const s = courses[currentCourse].find(x => x.id === id);
+        if(s) {
+            prepareStudent(s);
+            const oldLevelInfo = getLevelInfo(s.xp);
+            s.xp += Math.floor(amount);
+            s.sessionXP += Math.floor(amount);
+            
+            s.history.unshift({ desc: `+${amount} XP masivo`, date: new Date().toLocaleDateString() });
+            if(s.history.length > 30) s.history.pop();
+            
+            const newLevelInfo = getLevelInfo(s.xp);
+            
+            studentsAssigned.push(id);
+            if(newLevelInfo.level > oldLevelInfo.level) {
+                leveledUpStudents.push({name: s.name, level: newLevelInfo.level});
+            }
+        }
+    });
+    selectedStudents.clear();
+    saveData();
+    renderList();
+    
+    // Animar las filas después del renderizado completo
+    studentsAssigned.forEach(id => {
+        setTimeout(() => triggerRowAnimation(id), 50);
+    });
+    
+    // Si hubo subidas de nivel masivas
+    if(leveledUpStudents.length > 0) {
+        setTimeout(() => {
+            if(leveledUpStudents.length === 1) {
+                showLevelUp(leveledUpStudents[0].name, leveledUpStudents[0].level);
+            } else {
+                showLevelUp(`${leveledUpStudents.length} Estudiantes`, leveledUpStudents[0].level, true);
+            }
+        }, 600); // Dar tiempo a que vean la asignación de puntos primero
+    }
+}
+
+function clearSelection() {
+    selectedStudents.clear();
+    renderList();
+}
+
+function triggerRowAnimation(id) {
+    const row = document.getElementById('s-'+id);
+    const s = courses[currentCourse].find(x => x.id === id);
+    if(row && s) {
+        // Simple brillo verde para simular que ganaron algo
+        row.style.transition = 'all 0.4s';
+        row.style.transform = 'scale(1.02)';
+        row.style.borderColor = '#4ADE80';
+        row.style.background = '#F0FDF4';
+        setTimeout(() => {
+            row.style.transform = '';
+            row.style.borderColor = s.aliado ? '#FACC15' : '';
+            row.style.background = s.aliado ? '#FEF9C3' : '';
+        }, 1200);
+    }
+}
+
+function addXP(id, amount, customHistoryMsg = null) {
+    if(amount === 0) return; 
+    const s = courses[currentCourse].find(x => x.id === id);
+    if(!s) return;
+
+    prepareStudent(s);
+    const oldLevelInfo = getLevelInfo(s.xp);
+    
+    s.xp += Math.floor(amount);
+    if(s.xp < 0) s.xp = 0; // No bajar de cero XP global
+    
+    s.gold += Math.floor(amount);
+    if(s.gold < 0) s.gold = 0; // No bajar de cero oro
+    
+    s.sessionXP += Math.floor(amount);
+
+    if(customHistoryMsg) {
+        s.history.unshift({ desc: customHistoryMsg, date: new Date().toLocaleDateString() });
+    } else {
+        const sign = amount > 0 ? '+' : '';
+        s.history.unshift({ desc: `${sign}${amount} XP/Oro`, date: new Date().toLocaleDateString() });
+    }
+    if(s.history.length > 30) s.history.pop();
+    
+    const newLevelInfo = getLevelInfo(s.xp);
+    const oldLevel = oldLevelInfo.level;
+    const newLevel = newLevelInfo.level;
+    
+    saveData();
+    
+    // Renderizamos toda la lista instantáneamente. 
+    // Como ordenamos por xp, el estudiante que gané xp podría "escala posiciones" en pantalla al instante!
+    renderList();
+    
+    // Anima visualmente a la fila que acaba de ser recompesantada
+    const row = document.getElementById('s-'+id);
+    if(row){
+        // Efecto pulso general
+        row.style.transition = 'all 0.4s';
+        
+        if(newLevel > oldLevel) {
+            // Estallido dorado de subida de nivel
+            row.style.transform = 'scale(1.04)';
+            row.style.borderColor = '#FACC15';
+            row.style.background = '#FEF9C3';
+            row.style.boxShadow = '0 0 20px rgba(250, 204, 21, 0.6)';
+            
+            // Mostrar modal de subida de nivel
+            setTimeout(() => {
+                 showLevelUp(s.name, newLevel);
+            }, 500); // mostrar modal animado un momento después de asigar xp
+        } else {
+            // Brillo verde pequeño
+            row.style.transform = 'scale(1.02)';
+            row.style.borderColor = '#4ADE80';
+            row.style.background = '#F0FDF4';
+        }
+
+        setTimeout(() => {
+            row.style.transform = '';
+            row.style.borderColor = s.aliado ? '#FACC15' : '';
+            row.style.background = s.aliado ? '#FEF9C3' : '';
+            row.style.boxShadow = '';
+        }, 1200);
+    }
+}
+
+function showLevelUp(name, level, isMultiple = false) {
+    const modal = document.getElementById('modal-levelup');
+    document.getElementById('levelup-name').innerText = name;
+    
+    const levelSpan = document.getElementById('levelup-level-name');
+    levelSpan.className = `level ${level <= 8 ? 'level-'+level : 'level-max'}`;
+    levelSpan.innerText = `NIVEL ${level}`;
+
+    if(isMultiple) {
+         document.getElementById('levelup-title').innerText = '¡SUBIERON DE NIVEL! 🎉';
+         document.getElementById('levelup-info').innerHTML = `Han alcanzado el <span id="levelup-level-name" class="level ${level <= 8 ? 'level-'+level : 'level-max'}" style="font-size: 1.5rem; border-radius: 12px; padding: 8px 16px;">NIVEL ${level}</span>`;
+    } else {
+         document.getElementById('levelup-title').innerText = '¡NUEVO NIVEL! 🚀';
+         document.getElementById('levelup-info').innerHTML = `Ha alcanzado el <span id="levelup-level-name" class="level ${level <= 8 ? 'level-'+level : 'level-max'}" style="font-size: 1.5rem; border-radius: 12px; padding: 8px 16px;">NIVEL ${level}</span>`;
+    }
+    
+    modal.classList.remove('hidden');
+    // Para que los confetis o animaciones pesadas no rompan, la animación CSS ya lo escala visualmente atractivo.
+}
+
+function hideLevelUp() {
+    document.getElementById('modal-levelup').classList.add('hidden');
+}
+
+function toggleAliado(id) {
+    const s = courses[currentCourse].find(x => x.id === id);
+    if(s) {
+        s.aliado = !s.aliado;
+        const action = s.aliado ? 'Convertido en Aliado' : 'Removido como Aliado';
+        s.history.unshift({ desc: `${action}`, date: new Date().toLocaleDateString() });
+        if(s.history.length > 30) s.history.pop();
+        saveData();
+        renderList();
+    }
+}
+
+function showProfile(id) {
+    currentProfileId = id;
+    const s = prepareStudent(courses[currentCourse].find(x => x.id === id));
+    document.getElementById('prof-name').innerText = s.name;
+    const { level, pct, xpInLevel, xpForNextLevel } = getLevelInfo(s.xp);
+    
+    document.getElementById('prof-level').className = `level ${level <= 8 ? 'level-'+level : 'level-max'}`;
+    document.getElementById('prof-level').innerText = `NIVEL ${level}`;
+    document.getElementById('prof-xp').innerText = `${s.xp} XP (Progreso Global)`;
+    document.getElementById('prof-gold').innerText = `🪙 ${s.gold} Oro (Para Gastar)`;
+    document.getElementById('prof-bar').style.width = `${pct}%`;
+    document.getElementById('prof-bar-text').innerText = `${xpInLevel}/${xpForNextLevel}`;
+    document.getElementById('prof-badges').innerHTML = s.badges.map(b => `<span class="badge-icon" title="${b}">${b.split(' ')[0]} ${b.split(' ')[1] || ''}</span>`).join('') || '<span style="color:var(--subText); font-size:0.9rem;">Sin insignias preparadas. ¡Demuestra tu valor!</span>';
+    document.getElementById('prof-history').innerHTML = s.history.map(h => `<li><span>${h.desc}</span> <span style="color:var(--subText); font-size:0.8rem; font-weight:bold;">${h.date}</span></li>`).join('') || '<li style="color:var(--subText); justify-content:center;">Sin movimientos recientes.</li>';
+    
+    const allBadges = ['💡 Participación', '🤝 Compañerismo', '🚀 Esfuerzo', '🎨 Creatividad'];
+    document.getElementById('prof-badge-buttons').innerHTML = allBadges.map(b => {
+        const isAwarded = s.sessionBadges && s.sessionBadges.includes(b);
+        const style = isAwarded ? 'background: var(--topBarBorder); border-color: var(--subText); color: var(--subText); opacity: 0.7; transform: none;' : '';
+        return `<button class="badge-btn" style="${style}" onclick="awardBadge('${b}')">${b}</button>`;
+    }).join('');
+    
+    showModal('modal-profile');
+}
+
+function awardBadge(name) {
+    if(role !== 'teacher' || !currentProfileId) return;
+    const s = prepareStudent(courses[currentCourse].find(x => x.id === currentProfileId));
+    
+    if(s.sessionBadges.includes(name)) {
+        // Desapretar / Quitar
+        s.sessionBadges = s.sessionBadges.filter(b => b !== name);
+        const bIdx = s.badges.lastIndexOf(name);
+        if(bIdx !== -1) s.badges.splice(bIdx, 1);
+        addXP(s.id, -20, `Insignia revocada: ${name} (-20 XP y Oro)`);
+    } else {
+        // Apretar / Otorgar
+        s.sessionBadges.push(name);
+        s.badges.push(name);
+        addXP(s.id, 20, `¡Insignia ganada!: ${name} (+20 XP y Oro)`);
+    }
+    showProfile(currentProfileId);
+}
+
+function showShop(studentId = null) {
+    currentShopStudentId = studentId;
+    let s = null;
+    if(studentId !== null) {
+        s = prepareStudent(courses[currentCourse].find(x => x.id === studentId));
+    }
+    
+    document.getElementById('shop-subtitle').innerHTML = s ? `Comprando para: <strong style="color:var(--text); font-size:1.1rem;">${s.name}</strong>` : 'Catálogo General de Precios';
+    
+    let invHtml = '';
+    if(s) {
+        invHtml = `
+        <div style="margin-bottom:30px; background: var(--bg); padding: 15px; border-radius: 16px; border: 2px solid var(--btnShadow);">
+            <h3 style="color:var(--purplePrimary); margin:-5px 0 12px 0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">📦 Mochila / Inventario <span style="background:var(--purplePrimary); color:white; padding:2px 8px; border-radius:8px; font-size:0.8rem;">${s.inventory.filter(i => i.status === 'unused').length}</span></h3>
+            <div id="inventory-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px;">
+                ${s.inventory.length === 0 ? '<p style="color:var(--subText); font-size:0.9rem; margin:0;">Tu mochila está vacía. ¡Ahorra oro para comprar recompensas!</p>' : ''}
+                ${s.inventory
+                  .slice() // clonar para no mutar el original
+                  .sort((a, b) => {
+                      if (a.status === 'unused' && b.status !== 'unused') return -1;
+                      if (a.status !== 'unused' && b.status === 'unused') return  1;
+                      if (a.status === 'used' && b.status === 'used') return b.id - a.id; // Recién canjeados primero entre los usados
+                      return a.id - b.id; // Los más antiguos sin usar primero
+                  })
+                  .map(inv => `
+                    <div style="background:var(--cardBg); border:2px solid ${inv.status === 'unused' ? 'var(--yellowPrimary)' : 'var(--btnShadow)'}; border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; opacity: ${inv.status === 'unused' ? 1 : 0.6};">
+                        <span style="font-size:1.5rem;">${inv.icon}</span>
+                        <div style="flex:1; min-width:0;">
+                            <div style="font-weight:900; font-size:0.85rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${inv.name}</div>
+                            <div style="font-size:0.7rem; color:var(--subText);">${inv.status === 'unused' ? 'Sin usar' : 'Canjeado'}</div>
+                        </div>
+                        ${inv.status === 'unused' && role === 'teacher' ? `<button class="btn-sm" style="background:var(--yellowPrimary); color:#78350F; font-size:0.7rem; padding:4px 8px; border-bottom-width:2px !important;" onclick="useItem(${s.id}, ${inv.id})">USAR</button>` : ''}
+                    </div>
+                `).join('')}
+            </div>
+            <div style="margin-top:15px; font-weight:900; font-size:1.1rem; text-align:right; color:#D97706;">Balance: 🪙 ${s.gold} Oro</div>
+        </div>
+        <h3 style="color:var(--purplePrimary); margin-bottom:15px; font-size:1.15rem; border-left: 4px solid var(--yellowPrimary); padding-left: 10px;">🛒 Tienda de Artículos</h3>
+        `;
+    }
+
+    const content = document.getElementById('shop-content');
+    content.innerHTML = invHtml + `
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:15px;">
+            ${shopItems.map((item, i) => {
+                const canAfford = s && s.gold >= item.cost;
+                return `
+                <div class="shop-item" style="background:var(--rowBg); border:2px solid var(--btnShadow); border-radius:15px; padding:15px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.2s; ${!canAfford && s ? 'opacity:0.6; filter:grayscale(0.8);' : ''}">
+                    <div style="font-size:3.5rem; margin-bottom:10px; height:70px; display:flex; align-items:center; justify-content:center;">${item.icon}</div>
+                    <div style="font-weight:900; margin-bottom:4px; font-size:1rem; color:var(--text); line-height:1.1;">${item.name}</div>
+                    <div style="color:#D97706; font-weight:900; font-size:1rem; margin-bottom:12px;">🪙 ${item.cost}</div>
+                    ${role === 'teacher' && s ? 
+                        `<button class="btn-sm bshop" style="width:100%; border-radius:10px !important; ${!canAfford ? 'background: #94A3B8 !important; color:#FFF !important; cursor:not-allowed;' : ''}" onclick="buyItem(${i})" ${!canAfford?'disabled':''}>${canAfford ? '🛍️ Comprar' : 'Falta Oro'}</button>` 
+                        : (s ? `<span style="font-size:0.75rem; color:var(--subText); font-weight:bold; margin-top:auto; text-align:center;">Solo el Profesor puede canjear</span>` : `<span style="font-size:0.75rem; color:var(--purplePrimary); font-weight:900; margin-top:auto; text-align:center;">Catálogo de Premios</span>`)
+                    }
+                </div>
+                `;
+            }).join('')}
+        </div>
+    `;
+    showModal('modal-shop');
+}
+
+function showGuide() {
+    const container = document.getElementById('guide-content');
+    container.innerHTML = rewardSources.map(s => `
+        <div style="background:var(--cardBg); border:3px solid var(--purplePrimary); border-radius:20px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.3s; box-shadow:0 6px 15px rgba(0,0,0,0.05);">
+            <div style="font-size:3.5rem; margin-bottom:10px;">${s.icon}</div>
+            <div style="font-weight:900; font-size:1.2rem; color:var(--text); margin-bottom:5px; line-height:1.2;">${s.title}</div>
+            <div style="font-size:0.9rem; color:var(--subText); margin-bottom:15px; flex:1;">${s.desc}</div>
+            <div style="background:var(--purplePrimary); color:white; padding:6px 15px; border-radius:50px; font-weight:900; font-size:1.1rem; border:none; box-shadow:0 4px 0 #6D28D9;">+${s.points} XP</div>
+        </div>
+    `).join('');
+    showModal('modal-guide');
+}
+
+
+function useItem(studentId, itemId) {
+    const s = courses[currentCourse].find(x => x.id === studentId);
+    if(!s) return;
+    const item = s.inventory.find(i => i.id === itemId);
+    if(item && item.status === 'unused') {
+        if(confirm(`¿Confirmar que ${s.name} usa su recompensa "${item.name}" ahora?`)) {
+            item.status = 'used';
+            s.history.unshift({ desc: `¡Usó recompensa!: ${item.icon} ${item.name}`, date: new Date().toLocaleDateString() });
+            saveData();
+            renderList();
+            showShop(studentId);
+        }
+    }
+}
+
+function toggleCinemaMode() {
+    document.body.classList.toggle('cinema-mode');
+    const isCinema = document.body.classList.contains('cinema-mode');
+    if(isCinema) {
+        if(!document.getElementById('btn-exit-cinema')) {
+            const btn = document.createElement('button');
+            btn.id = 'btn-exit-cinema';
+            btn.innerHTML = '✖ Salir de Modo Cinema';
+            btn.style.cssText = 'position:fixed; top:20px; right:20px; z-index:10001; background:rgba(255,255,255,0.2); color:white; border:2px solid white; padding:10px 20px; border-radius:30px; cursor:pointer; font-weight:900; backdrop-filter:blur(10px);';
+            btn.onclick = toggleCinemaMode;
+            document.body.appendChild(btn);
+        }
+    } else {
+        const btn = document.getElementById('btn-exit-cinema');
+        if(btn) btn.remove();
+    }
+}
+
+function buyItem(idx) {
+    if(role !== 'teacher' || currentShopStudentId === null) return;
+    const item = shopItems[idx];
+    const s = prepareStudent(courses[currentCourse].find(x => x.id === currentShopStudentId));
+    
+    if(s.gold >= item.cost) {
+        if(confirm(`¿Estás seguro que ${s.name} va a intercambiar 🪙 ${item.cost} piezas de oro por "${item.name}"?`)) {
+            s.gold -= item.cost;
+            s.inventory.push({ id: Date.now() + Math.random(), name: item.name, icon: item.icon, status: 'unused', date: new Date().toLocaleDateString() });
+            s.history.unshift({ desc: `Compró recompensa: ${item.icon} ${item.name} (-${item.cost} Oro)`, date: new Date().toLocaleDateString() });
+            
+            saveData();
+            renderList();
+            showShop(currentShopStudentId); // Refresca tienda (botón y monedas actualizadas)
+        }
+    }
+}
+
+function shootConfetti() {
+    const duration = 2500;
+    const end = Date.now() + duration;
+    
+    const container = document.createElement('div');
+    container.style.position = 'fixed'; container.style.top = '0'; container.style.left = '0'; container.style.width = '100vw'; container.style.height = '100vh';
+    container.style.pointerEvents = 'none'; container.style.zIndex = '99999'; container.style.overflow = 'hidden';
+    document.body.appendChild(container);
+
+    const colors = ['#EF4444', '#3B82F6', '#F59E0B', '#10B981', '#8B5CF6', '#F472B6'];
+
+    let interval = setInterval(() => {
+        if(Date.now() > end) { clearInterval(interval); setTimeout(() => container.remove(), 2500); return; }
+        for(let i=0; i<4; i++) {
+            const el = document.createElement('div');
+            el.style.position = 'absolute'; el.style.left = Math.random() * 100 + 'vw'; el.style.top = '-20px';
+            el.style.width = Math.random() * 10 + 6 + 'px'; el.style.height = Math.random() * 20 + 10 + 'px';
+            el.style.background = colors[Math.floor(Math.random() * colors.length)];
+            el.style.opacity = Math.random() + 0.5; el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+            
+            const destX = (Math.random() - 0.5) * 400 + 'px';
+            const destY = window.innerHeight + 50 + 'px';
+            const durationAnim = Math.random() * 1500 + 1500;
+            
+            el.animate([
+                { transform: `translate(0, 0) rotate(0deg)` },
+                { transform: `translate(${destX}, ${destY}) rotate(${Math.random() * 1080}deg)` }
+            ], { duration: durationAnim, easing: 'ease-in', fill: 'forwards' });
+            container.appendChild(el);
+            setTimeout(() => el.remove(), durationAnim);
+        }
+    }, 40);
+}
+
+function showPodium() {
+    if(!currentCourse) return;
+    const list = courses[currentCourse].map(s => prepareStudent(s));
+    
+    let highlightedStudents = new Set();
+    let categories = [];
+    
+    // 1. Top points today (Racha del Día)
+    const sessionSorted = [...list].sort((a, b) => b.sessionXP - a.sessionXP);
+    const topToday = sessionSorted.find(s => s.sessionXP > 0 && !highlightedStudents.has(s.id));
+    if(topToday) {
+        highlightedStudents.add(topToday.id);
+        categories.push({
+            title: "🔥 Racha del Día", subtitle: "Mayor Subida de XP hoy",
+            student: topToday, stat: `+${topToday.sessionXP} XP`, color: "#EF4444", icon: "🔥"
+        });
+    }
+    
+    // 2. Top Global Points (Líder Supremo)
+    const globalSorted = [...list].sort((a, b) => b.xp - a.xp);
+    const topGlobal = globalSorted.find(s => s.xp > 0 && !highlightedStudents.has(s.id));
+    if(topGlobal) {
+        highlightedStudents.add(topGlobal.id);
+        categories.push({
+            title: "👑 Líder Supremo", subtitle: "Mayor Puntaje Global",
+            student: topGlobal, stat: `${topGlobal.xp} XP`, color: "#F59E0B", icon: "👑"
+        });
+    }
+    
+    // 3. Aliados
+    const aliados = list.filter(s => s.aliado && !highlightedStudents.has(s.id));
+    aliados.forEach(aliado => {
+        highlightedStudents.add(aliado.id);
+        categories.push({
+            title: "⭐ Aliado Valioso", subtitle: "Solidaridad y Apoyo",
+            student: aliado, stat: "Compañerismo", color: "#3B82F6", icon: "⭐"
+        });
+    });
+    
+    // 4. Badges (Insignias)
+    const badgeEarners = list.filter(s => s.sessionBadges && s.sessionBadges.length > 0 && !highlightedStudents.has(s.id));
+    badgeEarners.sort((a, b) => b.sessionBadges.length - a.sessionBadges.length);
+    badgeEarners.forEach(earner => {
+        highlightedStudents.add(earner.id);
+        categories.push({
+            title: "🏅 Coleccionista", subtitle: "Nuevas Insignias Obtenidas",
+            student: earner, stat: earner.sessionBadges.slice(0,2).join(', ') + (earner.sessionBadges.length > 2 ? '...' : ''), color: "#8B5CF6", icon: "🏅"
+        });
+    });
+    
+    const container = document.getElementById('podium-container');
+    if(categories.length === 0) {
+        container.innerHTML = '<p style="text-align:center; color:var(--subText); font-size:1.1rem; padding: 20px;">Aún no hay acciones destacables hoy. ¡La clase apenas comienza!</p>';
+    } else {
+        shootConfetti(); // Animación super llamativa
+        container.innerHTML = '<div class="podium-showcase">' + categories.map((cat, i) => `
+            <div class="podium-card animate-podium" style="animation-delay: ${i * 0.15}s; --theme-color: ${cat.color};">
+                <div class="podium-card-icon">${cat.icon}</div>
+                <div class="podium-card-content">
+                    <div class="podium-cat">${cat.title}</div>
+                    <div class="podium-sub">${cat.subtitle}</div>
+                    <div class="podium-name">${cat.student.name}</div>
+                    <div class="podium-stat">${cat.stat}</div>
+                </div>
+            </div>
+        `).join('') + '</div>';
+    }
+    showModal('modal-podium');
+}
+
+function resetClassSession() {
+    if(confirm('¿Seguro que quieres reiniciar la clase de hoy? Esto pondrá en cero la sesión para el podio de destacados y rehabilitará las insignias diarias, pero conservará intacto el XP total global de los alumnos.')) {
+        courses[currentCourse].forEach(s => { 
+            let pS = prepareStudent(s);
+            pS.sessionXP = 0; 
+            pS.sessionBadges = [];
+        });
+        saveData();
+        hideModal('modal-podium');
+    }
+}
+
+// --- Manejo del Modal ---
+function showModal(id) { document.getElementById(id).classList.remove('hidden'); }
+function hideModal(id) { document.getElementById(id).classList.add('hidden'); }
+function saveStudents() {
+    const val = document.getElementById('ta-students').value;
+    
+    // Separadores tolerados: Saltos de línea, o comillas
+    const parts = val.split(/[\n,]/).map(x => x.trim()).filter(x => x);
+    if(!parts.length) { hideModal('modal-add'); return; }
+    
+    const list = courses[currentCourse];
+    let maxId = list.length > 0 ? Math.max(...list.map(s => s.id)) : 0;
+    
+    parts.forEach(name => {
+        list.push({ id: ++maxId, name: name, xp: 0, aliado: false });
+    });
+    
+    hideModal('modal-add');
+    document.getElementById('ta-students').value = '';
+    
+    saveData();
+    // Retornamos al curso actualizado
+    renderList();
+}
+
+
+function updateMassXPText() {
+    if(document.getElementById('txt-pt1-mass')) document.getElementById('txt-pt1-mass').innerText = pointValues[0];
+    if(document.getElementById('txt-pt2-mass')) document.getElementById('txt-pt2-mass').innerText = pointValues[1];
+    if(document.getElementById('txt-pt3-mass')) document.getElementById('txt-pt3-mass').innerText = pointValues[2];
+}
+
+
+const themes = [
+    { name: 'Azul Brillo', hex: '#40AAFE', text: '#FFFFFF' },
+    { name: 'Naranja Fuerte', hex: '#FFB32F', text: '#FFFFFF' },
+    { name: 'Morado Mágico', hex: '#A663F6', text: '#FFFFFF' },
+    { name: 'Verde Manzana', hex: '#10B981', text: '#FFFFFF' },
+    { name: 'Coral Cálido', hex: '#FF6B6B', text: '#FFFFFF' },
+    { name: 'Cielo Diurno', hex: '#0EA5E9', text: '#FFFFFF' }
+];
+let currentThemeIdx = 0;
+
+function cycleTheme() {
+    currentThemeIdx = (currentThemeIdx + 1) % themes.length;
+    document.documentElement.style.setProperty('--theme-color', themes[currentThemeIdx].hex);
+    document.documentElement.style.setProperty('--theme-text', themes[currentThemeIdx].text);
+    localStorage.setItem('gamificacion_theme_v4', JSON.stringify({ hex: themes[currentThemeIdx].hex, text: themes[currentThemeIdx].text }));
+}
+
+// Check for saved theme
+window.addEventListener('load', () => {
+    let savedTheme = localStorage.getItem('gamificacion_theme_v4');
+    let tObj = { hex: '#40AAFE', text: '#FFFFFF' };
+    if(savedTheme) {
+        try { tObj = JSON.parse(savedTheme); } catch(e){}
+    } else {
+        localStorage.setItem('gamificacion_theme_v4', JSON.stringify(tObj));
+    }
+    document.documentElement.style.setProperty('--theme-color', tObj.hex);
+    document.documentElement.style.setProperty('--theme-text', tObj.text);
+    const idx = themes.findIndex(t => t.hex === tObj.hex);
+    if(idx !== -1) currentThemeIdx = idx;
+});
+
+
+// --- Configuración ---
+function openConfig() {
+    switchView('config');
+    cfgRenderCourses();
+    cfgRenderPoints();
+    cfgRenderShop();
+    cfgRenderGuide();
+    
+    // Init icon picker
+    document.getElementById('icon-picker-grid').innerHTML = libIcons.map((ic, i) => `<div style="cursor:pointer; padding:5px; border-radius:12px; display:inline-block; transition:0.2s;" onclick="cfgSelectIcon('${ic}')" onmouseover="this.style.background='var(--topBarBorder)'; this.style.transform='scale(1.2)';" onmouseout="this.style.background='transparent'; this.style.transform='none';">${ic}</div>`).join('');
+}
+
+function switchConfigToDash() {
+    initDash();
+}
+
+function cfgRenderCourses() {
+    const list = document.getElementById('cfg-course-list');
+    list.innerHTML = Object.keys(courses).map(c => `
+        <li style="display:flex; justify-content:space-between; padding:12px 15px; border-bottom:1px solid var(--topBarBorder); align-items:center;">
+            <span style="font-weight:900; font-size:1.1rem; color:var(--text);">${c} <small style="color:var(--subText); font-size:0.9rem; font-weight:800; opacity:0.8;">(${courses[c].length} est.)</small></span>
+            <button class="btn-sm" style="background:#EF4444; color:white; padding:6px 12px;" onclick="cfgDelCourse('${c}')">Borrar</button>
+        </li>
+    `).join('');
+    
+    const sel = document.getElementById('cfg-course-sel');
+    const oldVal = sel.value;
+    sel.innerHTML = '<option value="">-- Elige un Curso --</option>' + Object.keys(courses).map(c => `<option value="${c}">${c}</option>`).join('');
+    if(courses[oldVal]) {
+        sel.value = oldVal;
+    } else if(currentCourse) {
+        sel.value = currentCourse;
+    }
+    cfgRenderStudents();
+}
+
+function cfgAddCourse() {
+    const c = document.getElementById('cfg-new-course').value.trim();
+    if(c && !courses[c]) { courses[c] = []; saveData(); cfgRenderCourses(); document.getElementById('cfg-new-course').value = ''; }
+}
+function cfgDelCourse(c) {
+    if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso. ¿Deseas continuar?`)) { 
+        delete courses[c]; 
+        if(currentCourse === c) currentCourse = null; 
+        saveData(); 
+        cfgRenderCourses(); 
+    }
+}
+
+function cfgRenderPoints() {
+    document.getElementById('cfg-pt-1').value = pointValues[0];
+    document.getElementById('cfg-pt-2').value = pointValues[1];
+    document.getElementById('cfg-pt-3').value = pointValues[2];
+    updateMassXPText();
+}
+function cfgSavePoints() {
+    pointValues[0] = parseInt(document.getElementById('cfg-pt-1').value)||5;
+    pointValues[1] = parseInt(document.getElementById('cfg-pt-2').value)||10;
+    pointValues[2] = parseInt(document.getElementById('cfg-pt-3').value)||30;
+    localStorage.setItem('gamificacion_points', JSON.stringify(pointValues));
+    updateMassXPText();
+}
+
+function cfgRenderStudents() {
+    const c = document.getElementById('cfg-course-sel').value;
+    const container = document.getElementById('cfg-student-list');
+    if(!c) { container.innerHTML = '<p style="color:var(--subText); padding:10px;">Selecciona o añade un curso para gestionar a los estudiantes.</p>'; return; }
+    
+    if(courses[c].length === 0) {
+        container.innerHTML = '<p style="color:var(--subText); padding:10px;">Lista vacía. Añade a los alumnos pegando la lista desde Excel u otra fuente.</p>';
+    } else {
+        container.innerHTML = courses[c].map((s, i) => `
+            <div style="display:flex; gap:10px; background:var(--cardBg); padding:8px 12px; border-radius:12px; border:2px solid var(--btnShadow); align-items:center;">
+                <span style="font-size:0.8rem; font-weight:900; color:var(--subText); min-width:20px;">#${i+1}</span>
+                <input type="text" value="${s.name}" style="flex:1; min-width:0; border:none; background:transparent; font-weight:900; color:var(--text); font-size:1rem; outline:none;" onchange="cfgRenameStudent('${c}', ${s.id}, this.value)">
+                <button class="btn-sm" style="background:#EF4444; color:white; flex-shrink:0; width:36px; height:36px; padding:0; display:flex; align-items:center; justify-content:center;" onclick="cfgDelStudent('${c}', ${s.id})" title="Eliminar Alumno">✖</button>
+            </div>
+        `).join('');
+    }
+}
+
+function cfgRenameStudent(c, id, newName) {
+    if(newName.trim()) {
+        const s = courses[c].find(x => x.id === id);
+        if(s) s.name = newName.trim();
+        saveData();
+    }
+}
+function cfgDelStudent(c, id) {
+    if(confirm('¿Eliminar estudiante?')) {
+        courses[c] = courses[c].filter(x => x.id !== id);
+        saveData(); cfgRenderStudents(); cfgRenderCourses();
+    }
+}
+function cfgAddStudentsLot() {
+    const c = document.getElementById('cfg-course-sel').value;
+    if(!c) return alert("Selecciona un curso primero desde el menú anterior.");
+    const val = document.getElementById('cfg-new-students').value;
+    const parts = val.split(/[\n,]/).map(x => x.trim()).filter(x => x);
+    if(parts.length) {
+        let maxId = courses[c].length > 0 ? Math.max(...courses[c].map(s => s.id)) : 0;
+        parts.forEach(name => courses[c].push({ id: ++maxId, name: name, xp: 0, aliado: false }));
+        saveData(); cfgRenderStudents(); cfgRenderCourses();
+        document.getElementById('cfg-new-students').value = '';
+    }
+}
+
+function cfgRenderShop() {
+    document.getElementById('cfg-shop-list').innerHTML = shopItems.map((item, i) => `
+        <div style="display:flex; gap:10px; align-items:center; background:var(--cardBg); padding:16px; border-radius:12px; border:2px solid var(--btnShadow); flex-wrap:wrap; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+            <button style="font-size:2.5rem; padding:0; height:70px; width:70px; display:flex; align-items:center; justify-content:center; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:15px; flex: 0 0 auto; cursor:pointer;" onclick="cfgOpenIconPicker(${i})" title="Cambiar Icono">${item.icon}</button>
+            <div style="flex:2; display:flex; flex-direction:column; gap:5px; min-width:140px;">
+                <label style="font-size:0.75rem; font-weight:bold; color:var(--subText); margin-bottom:-4px;">Nombre Recompensa</label>
+                <input type="text" value="${item.name}" placeholder="Nombre" style="width:100%; padding:8px 10px; box-sizing:border-box; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold;" onchange="cfgUpdateShop(${i}, 'name', this.value)">
+            </div>
+            <div style="flex:1; display:flex; flex-direction:column; gap:5px; min-width:80px;">
+                <label style="font-size:0.75rem; font-weight:bold; color:var(--subText); margin-bottom:-4px;">Oro Coste</label>
+                <input type="number" value="${item.cost}" placeholder="Oro" style="width:100%; padding:8px 10px; box-sizing:border-box; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; color:#F59E0B;" onchange="cfgUpdateShop(${i}, 'cost', this.value)">
+            </div>
+            <button class="btn-sm" style="background:#EF4444; color:white; padding:10px; flex: 0 0 auto; align-self: center;" onclick="cfgDelShop(${i})" title="Eliminar Recompensa">✖</button>
+        </div>
+    `).join('');
+}
+function cfgAddShopItem() {
+    shopItems.push({ name: 'Nueva Recompensa', cost: 100, icon: '🌟' });
+    cfgSaveShop(); cfgRenderShop();
+}
+function cfgDelShop(i) {
+    if(confirm("¿Eliminar recompensa de la tienda?")) {
+        shopItems.splice(i, 1); cfgSaveShop(); cfgRenderShop();
+    }
+}
+function cfgUpdateShop(i, field, val) {
+    shopItems[i][field] = field === 'cost' ? (parseInt(val)||0) : val;
+    cfgSaveShop();
+}
+function cfgSaveShop() { localStorage.setItem('gamificacion_shop', JSON.stringify(shopItems)); }
+
+function cfgOpenIconPicker(idx) {
+    cfgShopEditingIndex = idx;
+    showModal('modal-icon-picker');
+}
+function cfgSelectIcon(ic) {
+    if(cfgShopEditingIndex !== null) {
+        shopItems[cfgShopEditingIndex].icon = ic;
+        cfgSaveShop(); cfgRenderShop();
+        hideModal('modal-icon-picker');
+    } else if(cfgGuideEditingIndex !== null) {
+        rewardSources[cfgGuideEditingIndex].icon = ic;
+        cfgSaveGuide(); cfgRenderGuide();
+        hideModal('modal-icon-picker');
+    }
+}
+
+// --- Gestión del Manual de Puntos (Guía) ---
+function cfgRenderGuide() {
+    const list = document.getElementById('cfg-guide-list');
+    list.innerHTML = rewardSources.map((s, i) => `
+        <div style="background:var(--cardBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
+            <div style="display:flex; gap:10px; align-items:center;">
+                <button style="font-size:2.5rem; width:65px; height:65px; display:flex; align-items:center; justify-content:center; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:15px; cursor:pointer;" onclick="cfgOpenGuideIconPicker(${i})" title="Cambiar Icono">${s.icon}</button>
+                <div style="flex:1;">
+                    <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Título Regla</label>
+                    <input type="text" value="${s.title}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold;" onchange="cfgUpdateGuide(${i}, 'title', this.value)">
+                </div>
+            </div>
+            <div>
+                <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Descripción</label>
+                <textarea style="width:100%; height:60px; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-size:0.9rem; font-family:inherit;" onchange="cfgUpdateGuide(${i}, 'desc', this.value)">${s.desc}</textarea>
+            </div>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="flex:1;">
+                    <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Puntos (+XP)</label>
+                    <input type="number" value="${s.points}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; color:var(--purplePrimary);" onchange="cfgUpdateGuide(${i}, 'points', this.value)">
+                </div>
+                <button class="btn-sm" style="background:#EF4444; color:white; height:40px; margin-top:18px;" onclick="cfgDelGuide(${i})">✖ Eliminar</button>
+            </div>
+        </div>
+    `).join('');
+}
+function cfgAddGuideItem() {
+    rewardSources.push({ title: 'Nueva Regla', desc: 'Explica cómo ganar esta XP...', points: 10, icon: '🚀' });
+    cfgSaveGuide(); cfgRenderGuide();
+}
+function cfgDelGuide(i) {
+    if(confirm("¿Eliminar esta regla del manual?")) {
+        rewardSources.splice(i, 1); cfgSaveGuide(); cfgRenderGuide();
+    }
+}
+function cfgUpdateGuide(i, field, val) {
+    rewardSources[i][field] = field === 'points' ? (parseInt(val)||0) : val;
+    cfgSaveGuide();
+}
+function cfgSaveGuide() { localStorage.setItem('gamificacion_guide', JSON.stringify(rewardSources)); }
+function cfgOpenGuideIconPicker(idx) {
+    cfgGuideEditingIndex = idx;
+    cfgShopEditingIndex = null;
+    showModal('modal-icon-picker');
+}
+
+// --- Sincronización Multi-Pestaña (Pizarra y Laptop) ---
+// Esto permite que las ventanas "Modo Estudiante" escuchen los cambios
+// hechos desde la ventana "Modo Profesor" en otro monitor y lancen las animaciones.
+window.addEventListener('storage', (e) => {
+    if(e.key === 'gamificacion_cursos' && e.newValue) {
+        const oldCourses = courses;
+        try { courses = JSON.parse(e.newValue); } catch(err){ return; }
+        
+        if(currentCourse && courses[currentCourse] && oldCourses[currentCourse]) {
+            const currentList = courses[currentCourse];
+            const oldList = oldCourses[currentCourse];
+            
+            let leveledUpStudents = [];
+            currentList.forEach(s => {
+                const oldStudent = oldList.find(x => x.id === s.id);
+                if(oldStudent && s.xp > oldStudent.xp) {
+                    const oldLevel = getLevelInfo(oldStudent.xp).level;
+                    const newLevel = getLevelInfo(s.xp).level;
+                    if(newLevel > oldLevel) {
+                        leveledUpStudents.push({name: s.name, level: newLevel});
+                    }
+                    setTimeout(() => triggerRowAnimation(s.id), 50);
+                }
+            });
+            
+            renderList();
+            
+            if(leveledUpStudents.length > 0) {
+                setTimeout(() => {
+                    if(leveledUpStudents.length === 1) {
+                        showLevelUp(leveledUpStudents[0].name, leveledUpStudents[0].level);
+                    } else {
+                        showLevelUp(`${leveledUpStudents.length} Estudiantes`, leveledUpStudents[0].level, true);
+                    }
+                }, 300);
+            }
+        } else {
+            renderList();
+        }
+    }
+});
+</script>
+</body>
+</html>
