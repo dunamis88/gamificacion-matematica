@@ -1466,7 +1466,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 <body data-role="student">
 
 <!-- OVERLAY DE LOGIN PREMIUM -->
-<div id="login-overlay" style="position:fixed; inset:0; z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px; overflow:hidden;">
+<div id="login-overlay" style="position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;">
     <!-- Fondo animado -->
     <div style="position:absolute; inset:0; background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%); z-index:0;"></div>
     <!-- Orbs animados -->
@@ -2065,30 +2065,17 @@ let currentUser = null;
 
 
 function loginWithGoogle() {
-    const btn = document.getElementById('btn-google-login');
-    const txt = document.getElementById('google-btn-text');
-    
-    // Feedback visual opcional
-    if (btn) { btn.style.opacity = '0.7'; btn.disabled = true; }
-    if (txt) txt.textContent = 'Abriendo ventana...';
-
-    // Crear proveedor y llamar a Firebase
+    // No modificar DOM intensamente antes del popup
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider)
-        .then(function() {
-            // Éxito: el onAuthStateChanged se encargará del resto
-            if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
-            if (txt) txt.textContent = 'Iniciar sesión con Google';
-        })
-        .catch(function(err) {
-            // Restaurar botón en caso de cerrar ventana
-            if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
-            if (txt) txt.textContent = 'Iniciar sesión con Google';
-            
-            if (err.code !== 'auth/popup-closed-by-user') {
+    auth.signInWithPopup(provider).catch(function(err) {
+        if (err.code !== 'auth/popup-closed-by-user') {
+            if (err.message.includes('popup') || err.message.includes('network') || err.code === 'auth/popup-blocked') {
+                alert('⚠️ El navegador bloqueó la ventana de Google.\n\nPor favor, PERMITE LAS VENTANAS EMERGENTES (pop-ups) para esta página ubicando el ícono en la barra de direcciones 👆. \n\nLuego vuelve a intentarlo.');
+            } else {
                 alert('Error al iniciar sesión: ' + err.message);
             }
-        });
+        }
+    });
 }
 
 
