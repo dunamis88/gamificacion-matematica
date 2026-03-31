@@ -1823,7 +1823,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
         </div>
     </div>
 </div>
-<div id="view-config" class="view hidden" style="background:#0f172a; color:#fff; display:flex; flex-direction:column; height: 100vh;">
+<div id="view-config" class="view hidden" style="background:rgba(15,23,42,0.85); backdrop-filter:blur(15px); color:#fff; display:flex; flex-direction:column; height: 100vh;">
     <!-- Top Bar -->
     <div style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding:20px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); flex-shrink:0;">
         <h2 style="margin:0; font-size:1.8rem; text-shadow:0 2px 8px rgba(0,0,0,0.4);">⚙️ Configuración del Profesor</h2>
@@ -1862,7 +1862,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
 
             <!-- Puntos -->
-            <div id="cfg-tab-points" class="cfg-tab-content hidden">
+            <div id="cfg-tab-points" class="cfg-tab-content">
                 <div class="premium-panel">
                     <h3>⭐ Botones de Puntos (XP)</h3>
                     <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Valores de XP para las tarjetas en la pizarra principal.</p>
@@ -1875,7 +1875,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
 
             <!-- Estudiantes -->
-            <div id="cfg-tab-students" class="cfg-tab-content hidden">
+            <div id="cfg-tab-students" class="cfg-tab-content">
                 <div class="premium-panel">
                     <h3>🎓 Gestión Estudiantes</h3>
                     <select id="cfg-course-sel" class="premium-input" style="max-width:400px; margin-bottom:20px; cursor:pointer;" onchange="cfgRenderStudents()"></select>
@@ -1888,7 +1888,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
 
             <!-- Tienda -->
-            <div id="cfg-tab-shop" class="cfg-tab-content hidden">
+            <div id="cfg-tab-shop" class="cfg-tab-content">
                 <div class="premium-panel">
                     <h3>🛒 Tienda de Recompensas</h3>
                     <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Haz clic en el icono de cada tarjeta para elegir uno de la biblioteca.</p>
@@ -1898,7 +1898,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
 
             <!-- Guía -->
-            <div id="cfg-tab-guide" class="cfg-tab-content hidden">
+            <div id="cfg-tab-guide" class="cfg-tab-content">
                 <div class="premium-panel">
                     <h3>📜 Reglas de Puntos (Cómo ganar XP)</h3>
                     <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Define qué acciones dan puntos y cuánta XP otorgan para que los alumnos lo vean.</p>
@@ -1908,7 +1908,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </div>
 
             <!-- Datos -->
-            <div id="cfg-tab-data" class="cfg-tab-content hidden">
+            <div id="cfg-tab-data" class="cfg-tab-content">
                 <div class="premium-panel">
                     <h3>📦 Datos y Copias de Seguridad</h3>
                     <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Transfiere o respalda manualmente tus datos sin depender de internet.</p>
@@ -2890,8 +2890,8 @@ function showShop(studentId = null) {
     let invHtml = '';
     if(s) {
         invHtml = `
-        <div style="margin-bottom:30px; background: var(--bg); padding: 15px; border-radius: 16px; border: 2px solid var(--btnShadow);">
-            <h3 style="color:var(--purplePrimary); margin:-5px 0 12px 0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">📦 Mochila / Inventario <span style="background:var(--purplePrimary); color:white; padding:2px 8px; border-radius:8px; font-size:0.8rem;">${s.inventory.filter(i => i.status === 'unused').length}</span></h3>
+        <div style="margin-bottom:30px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 16px; border: 1px dashed rgba(255,255,255,0.15);">
+            <h3 style="color:#fff; margin:-5px 0 12px 0; font-size:1.1rem; display:flex; align-items:center; gap:8px;">📦 Mochila / Inventario <span style="background:var(--purplePrimary); color:white; padding:2px 8px; border-radius:8px; font-size:0.8rem;">${s.inventory.filter(i => i.status === 'unused').length}</span></h3>
             <div id="inventory-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap:10px;">
                 ${s.inventory.length === 0 ? '<p style="color:var(--subText); font-size:0.9rem; margin:0;">Tu mochila está vacía. ¡Ahorra oro para comprar recompensas!</p>' : ''}
                 ${s.inventory
@@ -2903,35 +2903,35 @@ function showShop(studentId = null) {
                       return a.id - b.id; // Los más antiguos sin usar primero
                   })
                   .map(inv => `
-                    <div style="background:var(--cardBg); border:2px solid ${inv.status === 'unused' ? 'var(--yellowPrimary)' : 'var(--btnShadow)'}; border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; opacity: ${inv.status === 'unused' ? 1 : 0.6};">
+                    <div class="shop-inv-item" style="background:rgba(255,255,255,0.05); border:1px solid ${inv.status === 'unused' ? 'rgba(251,191,36,0.4)' : 'rgba(255,255,255,0.1)'}; border-radius:12px; padding:8px 12px; display:flex; align-items:center; gap:8px; opacity: ${inv.status === 'unused' ? 1 : 0.6}; transition:0.3s; color:#fff;">
                         <span style="font-size:1.5rem;">${inv.icon}</span>
                         <div style="flex:1; min-width:0;">
-                            <div style="font-weight:900; font-size:0.85rem; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${inv.name}</div>
+                            <div style="font-weight:900; font-size:0.85rem; color:rgba(255,255,255,0.9); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${inv.name}</div>
                             <div style="font-size:0.7rem; color:var(--subText);">${inv.status === 'unused' ? 'Sin usar' : 'Canjeado'}</div>
                         </div>
                         ${inv.status === 'unused' && role === 'teacher' ? `<button class="btn-sm" style="background:var(--yellowPrimary); color:#78350F; font-size:0.7rem; padding:4px 8px; border-bottom-width:2px !important;" onclick="useItem(${s.id}, ${inv.id})">USAR</button>` : ''}
                     </div>
                 `).join('')}
             </div>
-            <div style="margin-top:15px; font-weight:900; font-size:1.1rem; text-align:right; color:#D97706;">Balance: 🪙 ${s.gold} Oro</div>
+            <div style="margin-top:15px; font-weight:900; font-size:1.1rem; text-align:right; color:#FBBF24;">Balance: 🪙 ${s.gold} Oro</div>
         </div>
-        <h3 style="color:var(--purplePrimary); margin-bottom:15px; font-size:1.15rem; border-left: 4px solid var(--yellowPrimary); padding-left: 10px;">🛒 Tienda de Artículos</h3>
+        <h3 style="color:#fff; margin-bottom:15px; font-size:1.15rem; border-left: 4px solid var(--yellowPrimary); padding-left: 10px;">🛒 Tienda de Artículos</h3>
         `;
     }
 
     const content = document.getElementById('shop-content');
     content.innerHTML = invHtml + `
-        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:15px;">
+        <div id="shop-grid" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:20px; margin-top:10px;">
             ${shopItems.map((item, i) => {
                 const canAfford = s && s.gold >= item.cost;
                 return `
-                <div class="shop-item" style="background:var(--rowBg); border:2px solid var(--btnShadow); border-radius:15px; padding:15px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.2s; ${!canAfford && s ? 'opacity:0.6; filter:grayscale(0.8);' : ''}">
-                    <div style="font-size:3.5rem; margin-bottom:10px; height:70px; display:flex; align-items:center; justify-content:center;">${item.icon}</div>
-                    <div style="font-weight:900; margin-bottom:4px; font-size:1rem; color:var(--text); line-height:1.1;">${item.name}</div>
-                    <div style="color:#D97706; font-weight:900; font-size:1rem; margin-bottom:12px;">🪙 ${item.cost}</div>
+                <div class="shop-item-card" style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); box-shadow:0 10px 30px rgba(0,0,0,0.2); backdrop-filter:blur(10px); border-radius:24px; padding:15px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; position:relative; overflow:hidden; ${!canAfford && s ? 'opacity:0.6; filter:grayscale(0.8);' : ''}">
+                    <div style="font-size:3.5rem; margin-bottom:10px; height:70px; display:flex; align-items:center; justify-content:center; z-index:1;">${item.icon}</div>
+                    <div style="font-weight:900; margin-bottom:4px; font-size:1rem; color:#fff; line-height:1.1; z-index:1;">${item.name}</div>
+                    <div style="color:#FCD34D; text-shadow:0 0 10px rgba(251,191,36,0.3); font-weight:900; font-size:1.1rem; margin-bottom:12px; z-index:1;">🪙 ${item.cost}</div>
                     ${role === 'teacher' && s ? 
-                        `<button class="btn-sm bshop" style="width:100%; border-radius:10px !important; ${!canAfford ? 'background: #94A3B8 !important; color:#FFF !important; cursor:not-allowed;' : ''}" onclick="buyItem(${i})" ${!canAfford?'disabled':''}>${canAfford ? '🛍️ Comprar' : 'Falta Oro'}</button>` 
-                        : (s ? `<span style="font-size:0.75rem; color:var(--subText); font-weight:bold; margin-top:auto; text-align:center;">Solo el Profesor puede canjear</span>` : `<span style="font-size:0.75rem; color:var(--purplePrimary); font-weight:900; margin-top:auto; text-align:center;">Catálogo de Premios</span>`)
+                        `<button class="btn-sm bshop" style="width:100%; border-radius:12px !important; background:linear-gradient(135deg, #10B981, #059669) !important; color:#fff !important; font-weight:900 !important; border:none !important; box-shadow:0 4px 15px rgba(16,185,129,0.3) !important; transition:0.3s !important; z-index:1; ${!canAfford ? 'background: #475569 !important; color:#94A3B8 !important; cursor:not-allowed; box-shadow:none !important;' : ''}" onclick="buyItem(${i})" ${!canAfford?'disabled':''}>${canAfford ? '🛍️ Comprar' : 'Falta Oro'}</button>` 
+                        : (s ? `<span style="font-size:0.75rem; color:var(--subText); font-weight:bold; margin-top:auto; text-align:center;">Solo el Profesor puede canjear</span>` : `<span style="font-size:0.75rem; color:#A78BFA; font-weight:900; margin-top:auto; text-align:center;">Catálogo de Premios</span>`)
                     }
                 </div>
                 `;
@@ -2944,11 +2944,11 @@ function showShop(studentId = null) {
 function showGuide() {
     const container = document.getElementById('guide-content');
     container.innerHTML = rewardSources.map(s => `
-        <div style="background:var(--cardBg); border:3px solid var(--purplePrimary); border-radius:20px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.3s; box-shadow:0 6px 15px rgba(0,0,0,0.05);">
-            <div style="font-size:3.5rem; margin-bottom:10px;">${s.icon}</div>
-            <div style="font-weight:900; font-size:1.2rem; color:var(--text); margin-bottom:5px; line-height:1.2;">${s.title}</div>
-            <div style="font-size:0.9rem; color:var(--subText); margin-bottom:15px; flex:1;">${s.desc}</div>
-            <div style="background:var(--purplePrimary); color:white; padding:6px 15px; border-radius:50px; font-weight:900; font-size:1.1rem; border:none; box-shadow:0 4px 0 #6D28D9;">+${s.points} XP</div>
+        <div class="guide-item-card" style="background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
+            <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
+            <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
+            <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
+            <div style="background:linear-gradient(135deg, #ec4899, #8b5cf6); color:white; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(236,72,153,0.4); text-shadow:0 1px 3px rgba(0,0,0,0.3); z-index:1;">+${s.points} XP</div>
         </div>
     `).join('');
     showModal('modal-guide');
