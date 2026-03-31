@@ -643,8 +643,7 @@ body[data-role="teacher"] .grid { grid-template-columns: repeat(auto-fill, minma
 .name { font-weight: 900; font-size: 1.25rem; flex: 1; word-break: break-word; color: var(--text); padding-left:0;}
 .name-link { text-decoration: none; cursor: pointer; transition: 0.2s; }
 
-.gold-badge { background: var(--yellowPrimary) !important; border: none !important; border-radius: 12px !important; padding: 6px 12px !important; font-size: 1.1rem !important; box-shadow: none !important; color: #FFF !important; display: inline-flex; align-items: center; justify-content: center; gap: 6px; white-space: nowrap !important; flex-shrink: 0 !important; }
-.gold-badge svg { stroke: #FFF !important; width: 22px; height: 22px; fill: #FFF !important; }
+.gold-badge { background: #FEF3C7 !important; border: 2px solid var(--gold) !important; border-radius: 10px !important; padding: 4px 8px !important; font-size: 1rem !important; font-weight: 900 !important; box-shadow: none !important; color: #D97706 !important; display: inline-flex; align-items: center; justify-content: center; gap: 4px; white-space: nowrap !important; flex-shrink: 0 !important; }
 
 .level { font-weight: 900; padding: 4px 10px; border-radius: 10px; font-size: 0.8rem; text-transform: uppercase; background: var(--purplePrimary); color: #FFF; border: none; box-shadow: none;}
 .level-1 { background: #94A3B8; } /* Gris - Inicio */
@@ -674,6 +673,7 @@ body[data-role="teacher"] .grid { grid-template-columns: repeat(auto-fill, minma
 body.dark-mode .b10 { background: rgba(16, 185, 129, 0.15) !important; border-color: rgba(16, 185, 129, 0.3) !important; color: #34D399 !important; }
 body.dark-mode .b20 { background: rgba(59, 130, 246, 0.15) !important; border-color: rgba(59, 130, 246, 0.3) !important; color: #60A5FA !important; }
 body.dark-mode .b50 { background: rgba(139, 92, 246, 0.15) !important; border-color: rgba(139, 92, 246, 0.3) !important; color: #A78BFA !important; }
+body.dark-mode .gold-badge { background: rgba(245, 158, 11, 0.15) !important; border-color: rgba(245, 158, 11, 0.5) !important; color: #FCD34D !important; }
 
 .bali { background: var(--cardBg) !important; color: #94A3B8 !important; }
 .bali.active { background: #FFFBEB !important; color: var(--yellowPrimary) !important; border-color: #FDE68A !important; }
@@ -2663,7 +2663,7 @@ function renderList() {
                     <span class="name name-link ${s.aliado ? 'es-aliado' : ''}" onclick="event.stopPropagation(); showProfile(${s.id})">
                         ${s.aliado ? '⭐ ' : ''}${s.name}
                     </span>
-                    <div class="gold-badge" style="background:#FEF3C7; border:2px solid var(--gold); border-radius:10px; color:#D97706; font-weight:900; display:flex; gap:5px; align-items:center;">
+                    <div class="gold-badge">
                         🪙 ${s.gold}
                     </div>
                     <span class="level ${gradeClass}">Nivel ${level}</span>
@@ -2690,7 +2690,7 @@ function renderList() {
                                 ${s.aliado ? '⭐ ' : ''}${s.name}
                             </span>
                         </div>
-                        <div class="gold-badge" style="background:#FEF3C7; border:2px solid var(--gold); color:#D97706; font-weight:900;">🪙 ${s.gold}</div>
+                        <div class="gold-badge">🪙 ${s.gold}</div>
                     </div>
                     
                     <!-- Fila 2: Nivel y Barra de Experiencia -->
