@@ -1693,6 +1693,14 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             </button>
 
             <div class="nb-divider"></div>
+            
+            <!-- Notificaciones -->
+            <button class="nb-icon-btn" onclick="showNotifCenter()" title="Historial de Notificaciones" style="position:relative;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                <span id="notif-badge" style="position:absolute; top:-2px; right:-2px; background:#EF4444; color:white; font-size:0.65rem; min-width:18px; height:18px; border-radius:50%; display:none; align-items:center; justify-content:center; font-weight:900; border:2px solid var(--topBarBg); z-index:10;">0</span>
+            </button>
+
+            <div class="nb-divider"></div>
 
             <!-- Config + Avatar -->
             <button class="nb-icon-btn nb-btn-purple teacher-only" onclick="openConfig()" title="Configuración">
@@ -1809,6 +1817,18 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
         <h2 id="levelup-name">Nombre</h2>
         <p id="levelup-info">Ha alcanzado el <span id="levelup-level-name" class="level level-max" style="font-size: 1.5rem; border-radius: 12px; padding: 8px 16px;">Nivel X</span></p>
         <button class="btn-large" style="margin-top: 10px; max-width: 250px; background: #3B82F6;" onclick="hideLevelUp()">¡Increíble!</button>
+    </div>
+</div>
+
+<!-- Modal Historial Notificaciones -->
+<div id="modal-notif-center" class="modal-overlay hidden">
+    <div class="modal-gen-content" style="max-width: 500px; width: 90%; border-radius:30px;">
+        <button class="close-btn" onclick="hideModal('modal-notif-center')">✖</button>
+        <h2 style="display:flex; align-items:center; gap:12px; justify-content:center;">🔔 Notificaciones Recientes</h2>
+        <div id="notif-history-list" style="margin-top:20px; max-height:60vh; overflow-y:auto; display:flex; flex-direction:column; gap:10px; padding:5px;">
+            <!-- Renderizado por JS -->
+        </div>
+        <button class="btn-large" style="margin-top:20px; background:rgba(255,255,255,0.05); color:var(--text); border:1px solid rgba(255,255,255,0.1);" onclick="clearNotifHistory()">Limpiar Historial</button>
     </div>
 </div>
 
@@ -1994,13 +2014,10 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 #guide-content > div::before {
     content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top, rgba(139,92,246,0.2), transparent 70%); opacity: 0; transition: 0.4s;
 }
-#guide-content > div:hover {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(139,92,246,0.8) !important;
-    transform: translateY(-8px) scale(1.02) !important;
-    box-shadow: 0 20px 40px rgba(109,40,217,0.4) !important;
+/* Removido zoom redundante que causaba doble escalado en la guía */
+#guide-content > .guide-section-container:hover {
+    filter: none;
 }
-#guide-content > div:hover::before { opacity: 1; }
 #guide-content > div > div { color: #fff !important; position:relative; z-index:1; }
 #guide-content > div > div:last-child {
     background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
@@ -2102,6 +2119,11 @@ let isToastShowing = false;
 let levelUpQueue = [];
 let isLevelUpShowing = false;
 let cfgBadgeEditingIndex = null;
+
+let notificationsHistory = [];
+let unreadNotifCount = 0;
+let lastProcessedEventId = null;
+let lastFirebaseEvent = null;
 
 let badgesConfig = [
     { name: 'Participación', icon: '💡', points: 20 },
@@ -2368,22 +2390,44 @@ document.addEventListener('click', function(e) {
 });
 
 async function loadDataFromFirestore(uid) {
-    try {
-        const snap = await db.collection('teachers').doc(uid).get();
+    // Si ya hay un listener activo, lo cancelamos antes de crear uno nuevo
+    if (window.firestoreUnsubscribe) window.firestoreUnsubscribe();
+    
+    window.firestoreUnsubscribe = db.collection('teachers').doc(uid).onSnapshot(snap => {
         if (snap.exists) {
             const data = snap.data();
+            const oldCourses = JSON.parse(JSON.stringify(courses)); // Clon para comparar
+            
             if (data.courses) courses = data.courses;
             if (data.courseIcons) courseIcons = data.courseIcons;
             if (data.shop) shopItems = data.shop;
             if (data.guide) rewardSources = data.guide;
             if (data.points) pointValues = data.points;
             if (data.badgesConfig) badgesConfig = data.badgesConfig;
+            
+            // Detectar si hubo un evento remoto nuevo para mostrar notificación
+            if (data.lastEvent && data.lastEvent.id !== lastProcessedEventId) {
+                lastProcessedEventId = data.lastEvent.id;
+                // Solo disparamos el toast si el cambio vino de OTRO dispositivo (o si somos pantalla de estudiante)
+                // Para simplificar, lo disparamos siempre que no lo hayamos procesado localmente
+                if (data.lastEvent.type === 'points') {
+                    showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, data.lastEvent.icon || '✨', true);
+                }
+                if (data.lastEvent.type === 'levelUp') {
+                    showLevelUp(data.lastEvent.studentName, data.lastEvent.level);
+                }
+                if (data.lastEvent.type === 'badge') {
+                    showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
+                }
+            }
+            
+            // Refrescar vistas si estamos en ellas
+            if (currentCourse) renderList(); 
+            else renderCourses();
         }
-    } catch(e) {
-        console.warn('Error cargando desde Firestore, usando localStorage:', e);
-    }
-    // Ir a la pantalla de selección de rol primero
-    switchView('roles');
+    }, err => {
+        console.warn('Error en listener de Firestore:', err);
+    });
 }
 
 async function saveData() {
@@ -2405,6 +2449,7 @@ async function saveData() {
                 guide: rewardSources,
                 points: pointValues,
                 badgesConfig: badgesConfig,
+                lastEvent: lastFirebaseEvent,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
         } catch(e) {
@@ -2822,9 +2867,27 @@ function addXPToSelected(amount, customHistoryMsg = null) {
             s.history.unshift({ desc: msg, date: new Date().toLocaleDateString() });
             if(s.history.length > 30) s.history.pop();
             
-            showToast(msg, '✨');
+            showToast(`${s.name}: ${msg}`, '✨');
             
             const newLevelInfo = getLevelInfo(s.xp);
+            if (newLevelInfo.level > oldLevelInfo.level) {
+                // Evento de nivel up masivo se maneja individualmente en la UI
+                // Pero guardamos el último para el snapshot remoto
+                lastFirebaseEvent = {
+                    id: Date.now() + Math.random(),
+                    type: 'levelUp',
+                    studentName: s.name,
+                    level: newLevelInfo.level
+                };
+            }
+            // Evento de puntos (se sobreescribirá por el último en el bucle, pero saveData() al final capturará el estado actual)
+            lastFirebaseEvent = {
+                id: Date.now() + Math.random(),
+                type: 'points',
+                studentName: 'Grupo', // Opcional: enumerar nombres si son pocos
+                msg: `+${amount} XP a varios estudiantes`,
+                icon: '👥'
+            };
             
             studentsAssigned.push(id);
             if(newLevelInfo.level > oldLevelInfo.level) {
@@ -2888,13 +2951,33 @@ function addXP(id, amount, customHistoryMsg = null) {
     s.sessionXP += Math.floor(amount);
 
     const toastMsg = customHistoryMsg || `${amount > 0 ? '+' : ''}${amount} XP/Oro`;
-    showToast(toastMsg, amount > 0 ? '✨' : '⚠️');
+    
+    // Preparar evento para sincronización remota
+    lastFirebaseEvent = {
+        id: Date.now() + Math.random(),
+        type: 'points',
+        studentName: s.name,
+        msg: toastMsg,
+        icon: amount > 0 ? '✨' : '⚠️'
+    };
+
+    showToast(`${s.name}: ${toastMsg}`, amount > 0 ? '✨' : '⚠️');
 
     if(s.history.length > 30) s.history.pop();
     
     const newLevelInfo = getLevelInfo(s.xp);
     const oldLevel = oldLevelInfo.level;
     const newLevel = newLevelInfo.level;
+    
+    // Si sube de nivel, disparar evento de nivel
+    if (newLevel > oldLevel) {
+        lastFirebaseEvent = {
+            id: Date.now() + Math.random(),
+            type: 'levelUp',
+            studentName: s.name,
+            level: newLevel
+        };
+    }
     
     saveData();
     
@@ -2969,11 +3052,67 @@ function hideLevelUp() {
     }
 }
 
-function showToast(message, icon = '✨') {
-    // Si no es un mensaje del profesor o grupal, a veces no queremos saturar, 
-    // pero el usuario pidió ver las asignaciones arriba.
+function showToast(message, icon = '✨', isRemote = false) {
+    // Evitar duplicados si es el mismo mensaje exacto en menos de 1 segundo (debounce remoto)
+    if (isRemote && toastQueue.some(t => t.message === message)) return;
+
     toastQueue.push({message, icon});
+    
+    // Registrar en el historial
+    notificationsHistory.unshift({
+        id: Date.now(),
+        message: message,
+        icon: icon,
+        time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+        unread: true
+    });
+    if (notificationsHistory.length > 20) notificationsHistory.pop();
+    
+    unreadNotifCount++;
+    updateNotifBadge();
+
     if(!isToastShowing) processToastQueue();
+}
+
+function updateNotifBadge() {
+    const badge = document.getElementById('notif-badge');
+    if (badge) {
+        if (unreadNotifCount > 0) {
+            badge.innerText = unreadNotifCount > 99 ? '99+' : unreadNotifCount;
+            badge.style.display = 'flex';
+        } else {
+            badge.style.display = 'none';
+        }
+    }
+}
+
+function showNotifCenter() {
+    unreadNotifCount = 0;
+    updateNotifBadge();
+    
+    const list = document.getElementById('notif-history-list');
+    if (notificationsHistory.length === 0) {
+        list.innerHTML = `<div style="text-align:center; padding:40px 20px; color:var(--subText); font-weight:800;">No hay notificaciones recientes</div>`;
+    } else {
+        list.innerHTML = notificationsHistory.map(n => `
+            <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:15px; display:flex; align-items:center; gap:12px; border:1px solid rgba(255,255,255,0.1);">
+                <div style="font-size:1.8rem; background:rgba(0,0,0,0.2); width:45px; height:45px; display:flex; align-items:center; justify-content:center; border-radius:12px;">${n.icon}</div>
+                <div style="flex:1;">
+                    <div style="font-weight:900; color:#fff; font-size:1rem;">${n.message}</div>
+                    <div style="font-size:0.75rem; color:var(--subText); font-weight:900; margin-top:2px;">${n.time}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    showModal('modal-notif-center');
+}
+
+function clearNotifHistory() {
+    notificationsHistory = [];
+    unreadNotifCount = 0;
+    updateNotifBadge();
+    showNotifCenter();
 }
 
 function processToastQueue() {
@@ -3049,6 +3188,15 @@ function awardBadge(name, icon, pts) {
         // Apretar / Otorgar
         s.sessionBadges.push(fullBadge);
         s.badges.push(fullBadge);
+        
+        lastFirebaseEvent = {
+            id: Date.now() + Math.random(),
+            type: 'badge',
+            studentName: s.name,
+            msg: `¡Insignia ganada!: ${fullBadge}`,
+            icon: icon
+        };
+        
         addXP(s.id, pts, `¡Insignia ganada!: ${fullBadge} (+${pts} XP y Oro)`);
     }
     showProfile(currentProfileId);
@@ -3203,7 +3351,7 @@ function showGuide() {
 
     if(individual.length > 0) {
         html += `<h3 style="color:#A78BFA; text-align:left; border-bottom:1px solid rgba(167,139,250,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem; display:flex; align-items:center; gap:8px;"><span>🧑</span> Individuales / Variables</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom: 30px;">
+        <div class="guide-section-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom: 30px;">
             ${renderCards(individual, false)}
         </div>`;
     }
@@ -3211,7 +3359,7 @@ function showGuide() {
     html += `<h3 style="color:#FBBF24; text-align:left; border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem; display:flex; align-items:center; gap:8px;"><span>👥</span> Grupales (Aplica a seleccionados)</h3>`;
     
     if(group.length > 0) {
-        html += `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
+        html += `<div class="guide-section-container" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
             ${renderCards(group, true)}
         </div>`;
     }
