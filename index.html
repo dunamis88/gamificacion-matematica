@@ -2124,6 +2124,7 @@ let notificationsHistory = [];
 let unreadNotifCount = 0;
 let lastProcessedEventId = null;
 let lastFirebaseEvent = null;
+let myLastEventId = null; // ID del último evento generado localmente
 
 let badgesConfig = [
     { name: 'Participación', icon: '💡', points: 20 },
@@ -2407,16 +2408,21 @@ async function loadDataFromFirestore(uid) {
             
             // Sincronizar eventos (Toasts / LevelUp)
             if (data.lastEvent && data.lastEvent.id !== lastProcessedEventId) {
+                const isLocal = data.lastEvent.id === myLastEventId;
                 lastProcessedEventId = data.lastEvent.id;
-                if (!isFirstLoad) { // No disparar alertas de cosas pasadas en la primera carga
-                    if (data.lastEvent.type === 'points') {
+                
+                if (!isFirstLoad) {
+                    if (data.lastEvent.type === 'points' && !isLocal) {
                         showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, data.lastEvent.icon || '✨', true);
                     }
-                    if (data.lastEvent.type === 'levelUp') {
+                    if (data.lastEvent.type === 'levelUp' && !isLocal) {
                         showLevelUp(data.lastEvent.studentName, data.lastEvent.level);
                     }
-                    if (data.lastEvent.type === 'badge') {
+                    if (data.lastEvent.type === 'badge' && !isLocal) {
                         showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
+                    }
+                    if (data.lastEvent.type === 'dismissLevelUp' && !isLocal) {
+                        hideLevelUp(true); // Cerrar remotamente
                     }
                 }
             }
@@ -2881,23 +2887,28 @@ function addXPToSelected(amount, customHistoryMsg = null) {
             
             const newLevelInfo = getLevelInfo(s.xp);
             if (newLevelInfo.level > oldLevelInfo.level) {
-                // Evento de nivel up masivo se maneja individualmente en la UI
-                // Pero guardamos el último para el snapshot remoto
+                const lvId = Date.now() + Math.random();
+                myLastEventId = lvId;
                 lastFirebaseEvent = {
-                    id: Date.now() + Math.random(),
+                    id: lvId,
                     type: 'levelUp',
                     studentName: s.name,
                     level: newLevelInfo.level
                 };
+                showLevelUp(s.name, newLevelInfo.level);
             }
-            // Evento de puntos (se sobreescribirá por el último en el bucle, pero saveData() al final capturará el estado actual)
-            lastFirebaseEvent = {
-                id: Date.now() + Math.random(),
-                type: 'points',
-                studentName: 'Grupo', // Opcional: enumerar nombres si son pocos
-                msg: `+${amount} XP a varios estudiantes`,
-                icon: '👥'
-            };
+            // Evento de puntos (si no hubo level up)
+            if (!lastFirebaseEvent || lastFirebaseEvent.type !== 'levelUp') {
+                const evId = Date.now() + Math.random();
+                myLastEventId = evId;
+                lastFirebaseEvent = {
+                    id: evId,
+                    type: 'points',
+                    studentName: 'Grupo',
+                    msg: `+${amount} XP a varios estudiantes`,
+                    icon: '👥'
+                };
+            }
             
             studentsAssigned.push(id);
             if(newLevelInfo.level > oldLevelInfo.level) {
@@ -2963,8 +2974,10 @@ function addXP(id, amount, customHistoryMsg = null) {
     const toastMsg = customHistoryMsg || `${amount > 0 ? '+' : ''}${amount} XP/Oro`;
     
     // Preparar evento para sincronización remota
+    const evId = Date.now() + Math.random();
+    myLastEventId = evId;
     lastFirebaseEvent = {
-        id: Date.now() + Math.random(),
+        id: evId,
         type: 'points',
         studentName: s.name,
         msg: toastMsg,
@@ -2981,12 +2994,16 @@ function addXP(id, amount, customHistoryMsg = null) {
     
     // Si sube de nivel, disparar evento de nivel
     if (newLevel > oldLevel) {
+        const lvId = Date.now() + Math.random();
+        myLastEventId = lvId;
         lastFirebaseEvent = {
-            id: Date.now() + Math.random(),
+            id: lvId,
             type: 'levelUp',
             studentName: s.name,
             level: newLevel
         };
+        showLevelUp(s.name, newLevel);
+        // Nota: saveData se llama abajo
     }
     
     saveData();
@@ -3053,9 +3070,21 @@ function showLevelUp(name, level, isMultiple = false) {
     modal.classList.remove('hidden');
 }
 
-function hideLevelUp() {
+function hideLevelUp(remote = false) {
     document.getElementById('modal-levelup').classList.add('hidden');
     isLevelUpShowing = false;
+    
+    // Si somos el profesor y cerramos manualmente, sincronizar con alumnos
+    if (!remote && role === 'teacher') {
+        const evId = Date.now() + Math.random();
+        myLastEventId = evId;
+        lastFirebaseEvent = {
+            id: evId,
+            type: 'dismissLevelUp'
+        };
+        saveData();
+    }
+
     if(levelUpQueue.length > 0) {
         const next = levelUpQueue.shift();
         setTimeout(() => showLevelUp(next.name, next.level, next.isMultiple), 300);
