@@ -2466,8 +2466,17 @@ function toggleRole() {
 }
 
 function switchView(vId) {
-    ['roles', 'courses', 'dash', 'config'].forEach(id => document.getElementById('view-'+id).classList.add('hidden'));
-    document.getElementById('view-'+vId).classList.remove('hidden');
+    ['roles', 'courses', 'dash', 'config'].forEach(id => {
+        const el = document.getElementById('view-'+id);
+        if(el) el.classList.add('hidden');
+    });
+    const target = document.getElementById('view-'+vId);
+    if(target) {
+        target.classList.remove('hidden');
+        if(vId === 'courses') renderCourses();
+        if(vId === 'config') { cfgRenderCourses(); cfgRenderShop(); cfgRenderGuide(); }
+        if(vId === 'dash') renderList();
+    }
 }
 
 // --- Renderizados ---
@@ -2476,8 +2485,6 @@ function renderCourses() {
     const cb = document.getElementById('course-buttons');
     cb.innerHTML = '';
 
-    // Iconos rotativos por curso
-    const courseIcons = ['\ud83d\udcd6','\ud83e\uddee','\ud83d\udd2c','\ud83c\udfa8','\ud83c\udf0d','\ud83e\uddea','\ud83d\udcd0','\ud83c\udfa4','\ud83c\udfeb','\ud83c\udf1f'];
     const colorCount = 5;
 
     // Panel agregar curso
@@ -2756,7 +2763,11 @@ function renderSelectionBarActions() {
 }
 
 function addXPToSelected(amount, customHistoryMsg = null) {
-    if(amount <= 0 || selectedStudents.size === 0) return;
+    if(amount <= 0) return;
+    if(selectedStudents.size === 0) {
+        alert('⚠️ Primero debes marcar al menos a un estudiante en la lista de asistencia.');
+        return;
+    }
     let studentsAssigned = [];
     let leveledUpStudents = [];
     
@@ -3030,37 +3041,67 @@ function showShop(studentId = null) {
 }
 
 function showGuide() {
+    if(!rewardSources.some(s => s.type === 'group')) {
+        rewardSources.push({ title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹', type: 'group' });
+        rewardSources.push({ title: 'Súper Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫', type: 'group' });
+        saveData();
+    }
+
     const individual = rewardSources.filter(s => s.type !== 'group');
     const group = rewardSources.filter(s => s.type === 'group');
     
-    let html = '';
+    let html = `
+    <style>
+        .guide-item-card { -webkit-tap-highlight-color: transparent; }
+        .guide-item-card:hover { transform: translateY(-8px) scale(1.02); border-color: rgba(251,191,36,0.8) !important; box-shadow: 0 20px 40px rgba(0,0,0,0.4) !important; z-index: 10; }
+        .guide-item-card:active { transform: scale(0.95); opacity: 0.85; transition: 0.1s; border-color: #fff !important; }
+        .guide-item-card:hover .card-icon-pop { transform: scale(1.15) rotate(5deg); }
+        .guide-item-card button:active { pointer-events: none; }
+    </style>
+    `;
     
-    if(individual.length > 0) {
-        html += `<h3 style="color:#fff; text-align:left; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem;">🧑 Individuales</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom: 25px;">`;
-        html += individual.map(s => `
-            <div class="guide-item-card" style="background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
-                <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
-                <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
-                <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
-                <div style="background:linear-gradient(135deg, #ec4899, #8b5cf6); color:white; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(236,72,153,0.4); text-shadow:0 1px 3px rgba(0,0,0,0.3); z-index:1;">+${s.points} XP</div>
+    const renderCards = (items, isGroup) => {
+        return items.map(s => {
+            const canClick = role === 'teacher';
+            let action = '';
+            let cursor = 'default';
+            let info = '';
+            
+            if(canClick) {
+                cursor = 'pointer';
+                if(isGroup) {
+                    action = `onclick="if(selectedStudents.size === 0) { alert('👥 Primero selecciona a los estudiantes en la lista usando las casillas a su izquierda.'); } else { hideModal('modal-guide'); addXPToSelected(${s.points}, '${s.icon} ${s.title}'); }"`;
+                    info = 'Toca para premiar a los seleccionados';
+                } else {
+                    action = `onclick="if(selectedStudents.size > 0) { hideModal('modal-guide'); addXPToSelected(${s.points}, '${s.icon} ${s.title}'); } else { alert('🧑 Para dar puntos individuales primero selecciona a alguien o usa el botón directo en su tarjeta.'); }"`;
+                    info = 'Toca para premiar a los seleccionados';
+                }
+            }
+            
+            return `
+            <div class="guide-item-card" ${action} title="${info}" style="background:rgba(${isGroup ? '251,191,36' : '139,92,246'},0.05); border:2px solid rgba(${isGroup ? '251,191,36' : '139,92,246'},0.3); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:all 0.3s cubic-bezier(0.4, 0, 0.2, 1); box-shadow:0 10px 30px rgba(0,0,0,0.2); backdrop-filter:blur(12px); position:relative; overflow:hidden; cursor:${cursor};">
+                <div style="font-size:4rem; margin-bottom:12px; z-index:1; transition:transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);" class="card-icon-pop">${s.icon}</div>
+                <div style="font-weight:900; font-size:1.3rem; color:#fff; margin-bottom:8px; line-height:1.2; z-index:1;">${s.title}</div>
+                <div style="font-size:0.95rem; color:rgba(255,255,255,0.75); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
+                <div style="background:linear-gradient(135deg, ${isGroup ? '#FBBF24, #F59E0B' : '#A78BFA, #8B5CF6'}); color:${isGroup ? '#334155' : 'white'}; padding:8px 24px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(0,0,0,0.2); text-shadow:none; z-index:1;">+${s.points} XP</div>
             </div>
-        `).join('');
-        html += `</div>`;
+            `;
+        }).join('');
+    };
+
+    if(individual.length > 0) {
+        html += `<h3 style="color:#A78BFA; text-align:left; border-bottom:1px solid rgba(167,139,250,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem; display:flex; align-items:center; gap:8px;"><span>🧑</span> Individuales / Variables</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom: 30px;">
+            ${renderCards(individual, false)}
+        </div>`;
     }
     
+    html += `<h3 style="color:#FBBF24; text-align:left; border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem; display:flex; align-items:center; gap:8px;"><span>👥</span> Grupales (Aplica a seleccionados)</h3>`;
+    
     if(group.length > 0) {
-        html += `<h3 style="color:#FBBF24; text-align:left; border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem;">👥 Grupales (Para todo el curso presente)</h3>
-        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">`;
-        html += group.map(s => `
-            <div class="guide-item-card" style="background:rgba(251,191,36,0.05); border:1px solid rgba(251,191,36,0.4); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
-                <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
-                <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
-                <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
-                <div style="background:linear-gradient(135deg, #FBBF24, #F59E0B); color:#334155; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(251,191,36,0.4); text-shadow:0 1px 3px rgba(255,255,255,0.5); z-index:1;">+${s.points} XP</div>
-            </div>
-        `).join('');
-        html += `</div>`;
+        html += `<div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">
+            ${renderCards(group, true)}
+        </div>`;
     }
 
     const container = document.getElementById('guide-content');
