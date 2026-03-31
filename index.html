@@ -2298,21 +2298,46 @@ let currentUser = null;
 
 
 function loginWithGoogle() {
+    if (typeof firebase === 'undefined' || !auth) {
+        alert('❌ Error: El sistema de Google (Firebase) no se ha cargado. Revisa tu conexión a Internet.');
+        return;
+    }
+    
+    if (window.location.protocol === 'file:') {
+        alert('⚠️ ATENCIÓN: El inicio de sesión con Google NO funciona abriendo el archivo directamente (doble clic en el .html). \n\nDebes subirlo a una página web o usar un servidor local (como Live Server) para que funcione como profesor.');
+        return;
+    }
+
     const txt = document.getElementById('google-btn-text');
     if (txt) txt.textContent = 'Abriendo ventana...';
 
     const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: 'select_account' }); // Forzar selección de cuenta
+    auth.useDeviceLanguage(); // Usar idioma del navegador
+
     auth.signInWithPopup(provider)
         .then(() => {
             if (txt) txt.textContent = 'Iniciar sesión con Google';
         })
         .catch(err => {
             if (txt) txt.textContent = 'Iniciar sesión con Google';
-            if (err.code !== 'auth/popup-closed-by-user') {
-                alert('Error al iniciar sesión: ' + err.message);
+            if (err.code === 'auth/popup-blocked') {
+                alert('⚠️ El navegador bloqueó la ventana de Google. Por favor, permite las ventanas emergentes en esta página.');
+            } else if (err.code !== 'auth/popup-closed-by-user') {
+                alert('❌ Error al iniciar sesión (' + err.code + '): ' + err.message);
             }
         });
 }
+
+// Escuchador global de errores para depurar si algo falla
+window.onerror = function(msg, url, lineNo, columnNo, error) {
+    console.error('Error Global:', msg, url, lineNo);
+    // Solo mostrar alerta de error crítico si es al inicio
+    if (isFirstLoad) {
+        // alert('⚠️ Error en el sistema (' + lineNo + '): ' + msg);
+    }
+    return false;
+};
 
 
 function signOut() {
@@ -3472,7 +3497,6 @@ function showGuide() {
                 }
             }
             
-            return `
             return `
             <div class="guide-item-card" ${action} title="${info}" style="cursor:${cursor};">
                 <div style="font-size:3.5rem; margin-bottom:12px; z-index:1; transition:transform 0.4s;" class="card-icon-pop">${s.icon}</div>
