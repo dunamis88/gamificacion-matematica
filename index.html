@@ -635,7 +635,8 @@ body[data-role="teacher"] .grid { grid-template-columns: repeat(auto-fill, minma
   color: var(--text) !important;
 }
 .row:hover { transform: translateY(-3px); box-shadow: 0 8px 15px rgba(0,0,0,0.08) !important; }
-.row.selected { transform: scale(1.02); border-color: #3B82F6 !important; background: #EFF6FF !important; }
+.row.absent { opacity: 0.45; filter: grayscale(1); }
+.row.absent:hover { opacity: 0.85; filter: none; }
 .row.es-aliado { border-color: var(--yellowPrimary) !important; }
 
 .rank { font-weight: 900; font-size: 1.25rem; color: var(--subText); min-width: 35px; background: transparent; padding: 0; text-align: left; border: none; opacity: 0.8;}
@@ -762,7 +763,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--purplePrimary) !
 .grid.list-mode { grid-template-columns: 1fr !important; gap: 8px !important; }
 .grid.list-mode .row { 
     display: grid !important;
-    grid-template-columns: 50px 240px 115px 105px 1fr 240px !important;
+    grid-template-columns: 24px 40px 230px 115px 105px 1fr 240px !important;
     align-items: center !important; 
     padding: 8px 15px !important; 
     gap: 12px !important; 
@@ -1707,13 +1708,10 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
     </nav>
     
     <div class="dash-content">
-        <div id="selection-bar" class="teacher-only hidden" style="display:flex; justify-content:space-between; align-items:center; transition: background 0.3s; margin-bottom:15px;">
-            <span id="selection-count" style="font-weight:900; transition: color 0.3s;">0 estudiantes seleccionados</span>
-            <div style="display:flex; gap:10px; flex-wrap:wrap;">
-                <button class="btn-sm b10" onclick="addXPToSelected(pointValues[0])">+<span id="txt-pt1-mass"></span> a todos</button>
-                <button class="btn-sm b20" onclick="addXPToSelected(pointValues[1])">+<span id="txt-pt2-mass"></span> a todos</button>
-                <button class="btn-sm b50" onclick="addXPToSelected(pointValues[2])">+<span id="txt-pt3-mass"></span> a todos</button>
-                <button class="btn-sm" style="background:var(--btnBg); color:var(--text);" onclick="clearSelection()">Desmarcar</button>
+        <div id="selection-bar" class="teacher-only hidden" style="display:flex; justify-content:space-between; align-items:center; transition: background 0.3s; margin-bottom:15px; background: rgba(59,130,246,0.08); padding: 12px 20px; border-radius: 16px; border: 1px solid rgba(59,130,246,0.3);">
+            <span id="selection-count" style="font-weight:900; color: #1e3a8a; font-size: 1.1rem; margin:0; flex-shrink: 0; margin-right: 15px;">0 estudiantes presentes</span>
+            <div id="selection-bar-actions" style="display:flex; gap:8px; flex-wrap:wrap; justify-content: flex-end;">
+                <!-- Dinamicamente renderizado por JS -->
             </div>
         </div>
 
@@ -1818,7 +1816,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
         <button class="close-btn" onclick="hideModal('modal-guide')">✖</button>
         <h2>📜 Reglas de Puntos (Cómo Ganar)</h2>
         <p style="text-align:center; color:var(--subText); margin-bottom:25px; font-weight:800;">¡Descubre cómo ganar puntos de experiencia y subir de nivel!</p>
-        <div id="guide-content" style="padding:10px 20px 20px; display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; max-height:65vh; overflow-y:auto;">
+        <div id="guide-content" style="padding:10px 20px 20px; max-height:65vh; overflow-y:auto;">
             <!-- Renderizado por JS -->
         </div>
     </div>
@@ -2093,12 +2091,12 @@ let shopItems = [
 ];
 
 let rewardSources = [
-    { title: 'Participación Estelar', desc: 'Levantar la mano y participar activamente en clase.', points: 10, icon: '🗣️' },
-    { title: 'Tarea Completa', desc: 'Entregar tus deberes a tiempo y con buena calidad.', points: 20, icon: '📚' },
-    { title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹' },
-    { title: 'Ayudante Pro', desc: 'Colaborar con el profesor y ayudar a repartir materiales.', points: 15, icon: '🤝' },
-    { title: 'Compañerismo', desc: 'Ayudar a un compañero que tenga dudas o dificultades.', points: 10, icon: '💖' },
-    { title: 'Super Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫' }
+    { title: 'Participación Estelar', desc: 'Levantar la mano y participar activamente en clase.', points: 10, icon: '🗣️', type: 'individual' },
+    { title: 'Tarea Completa', desc: 'Entregar tus deberes a tiempo y con buena calidad.', points: 20, icon: '📚', type: 'individual' },
+    { title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹', type: 'group' },
+    { title: 'Ayudante Pro', desc: 'Colaborar con el profesor y ayudar a repartir materiales.', points: 15, icon: '🤝', type: 'individual' },
+    { title: 'Compañerismo', desc: 'Ayudar a un compañero que tenga dudas o dificultades.', points: 10, icon: '💖', type: 'group' },
+    { title: 'Super Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫', type: 'group' }
 ];
 
 const libIcons = ['🪑','🎵','⏱️','🎫','🎮','🍬','📚','🏆','⭐','🍕','🎨','🎲','🧩','🧸','📱','💻','🏀','⚽','🍎','💡','🌟','⚡','🔮','👑','🗣️','🧹','🤝','💖','🤫','🚀','✅','📝','📅','🎒','🥛','🥗'];
@@ -2112,7 +2110,15 @@ if(localStorage.getItem('gamificacion_shop')) {
     try { shopItems = JSON.parse(localStorage.getItem('gamificacion_shop')); } catch(e){}
 }
 if(localStorage.getItem('gamificacion_guide')) {
-    try { rewardSources = JSON.parse(localStorage.getItem('gamificacion_guide')); } catch(e){}
+    try { 
+        rewardSources = JSON.parse(localStorage.getItem('gamificacion_guide')); 
+        rewardSources.forEach(r => {
+            if(!r.type) {
+                if(['Limpieza del Aula', 'Super Silencio', 'Súper Silencio', 'Trabajo en Equipo', 'Compañerismo'].includes(r.title)) r.type = 'group';
+                else r.type = 'individual';
+            }
+        });
+    } catch(e){}
 }
 
 
@@ -2495,6 +2501,7 @@ function renderCourses() {
         card.onclick = () => {
             currentCourse = c;
             selectedStudents.clear();
+            courses[c].forEach(student => selectedStudents.add(student.id)); // Por defecto asisten todos
             searchTerm = '';
             const searchInput = document.getElementById('search-input');
             if (searchInput) searchInput.value = '';
@@ -2554,12 +2561,13 @@ function renderList() {
 
     const list = courses[currentCourse];
     
-    // Mostrar/ocultar barra de selección
+    // Mostrar/ocultar barra de selección y actualizar cantidad
     const selectionBar = document.getElementById('selection-bar');
     if(selectionBar) {
-        if(role === 'teacher' && selectedStudents.size > 0) {
+        if(role === 'teacher' && currentCourse) {
             selectionBar.classList.remove('hidden');
-            document.getElementById('selection-count').innerText = `${selectedStudents.size} ${selectedStudents.size === 1 ? 'estudiante seleccionado' : 'estudiantes seleccionados'}`;
+            document.getElementById('selection-count').innerText = `${selectedStudents.size}/${list.length} presentes`;
+            renderSelectionBarActions();
         } else {
             selectionBar.classList.add('hidden');
         }
@@ -2608,8 +2616,8 @@ function renderList() {
         else if (s.rankPos === 3) rankClass += " rank-3";
 
         // Clases dinámicas por si es aliado o seleccionado
-        const isSelected = selectedStudents.has(s.id);
-        const finalRowClass = `${s.aliado ? 'es-aliado' : ''} ${isSelected ? 'selected' : ''}`.trim();
+        const isPresent = selectedStudents.has(s.id);
+        const finalRowClass = `${s.aliado ? 'es-aliado' : ''} ${isPresent ? '' : 'absent'}`.trim();
         const gradeClass = level <= 8 ? `level-${level}` : 'level-max';
 
         const gradeColors = { 1:'#94A3B8', 2:'#2DD4BF', 3:'#60A5FA', 4:'#A78BFA', 5:'#F472B6', 6:'#FBBF24', 7:'#FB923C', 8:'#EF4444'};
@@ -2622,7 +2630,8 @@ function renderList() {
 
         if (viewMode === 'list') {
             container.innerHTML += `
-                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles} cursor:${role==='teacher'?'pointer':'default'};" onclick="if(role==='teacher') toggleSelection(${s.id})">
+                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles}">
+                    ${role === 'teacher' ? `<input type="checkbox" title="Asistencia" class="teacher-only" ${isPresent ? 'checked' : ''} style="width:20px; height:20px; cursor:pointer; margin:0; flex-shrink:0;" onchange="toggleSelection(${s.id})">` : `<div></div>`}
                     <span class="${rankClass}">#${s.rankPos}</span>
                     <span class="name name-link ${s.aliado ? 'es-aliado' : ''}" onclick="event.stopPropagation(); showProfile(${s.id})">
                         ${s.aliado ? '⭐ ' : ''}${s.name}
@@ -2644,10 +2653,11 @@ function renderList() {
                 </div>`;
         } else {
             container.innerHTML += `
-                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles} cursor:${role==='teacher'?'pointer':'default'};" onclick="if(role==='teacher') toggleSelection(${s.id})">
+                <div class="row ${finalRowClass}" id="s-${s.id}" style="${dynamicStyles}">
                     <!-- Fila 1: Rango, Nombre y Oro -->
                     <div style="display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px;">
                         <div style="display:flex; align-items:center; gap:8px; flex:1; overflow:hidden;">
+                            ${role === 'teacher' ? `<input type="checkbox" title="Asistencia" class="teacher-only" ${isPresent ? 'checked' : ''} style="width:20px; height:20px; cursor:pointer; margin:0; flex-shrink:0;" onchange="toggleSelection(${s.id})">` : ''}
                             <span class="${rankClass}">#${s.rankPos}</span>
                             <span class="name name-link ${s.aliado ? 'es-aliado' : ''}" onclick="event.stopPropagation(); showProfile(${s.id})">
                                 ${s.aliado ? '⭐ ' : ''}${s.name}
@@ -2689,7 +2699,35 @@ function toggleSelection(id) {
     renderList();
 }
 
-function addXPToSelected(amount) {
+function toggleSelectAll() {
+    if(selectedStudents.size === courses[currentCourse].length) {
+        selectedStudents.clear(); // Desmarcar todos
+    } else {
+        selectedStudents.clear();
+        courses[currentCourse].forEach(s => selectedStudents.add(s.id)); // Marcar todos
+    }
+    renderList();
+}
+
+function renderSelectionBarActions() {
+    const actionContainer = document.getElementById('selection-bar-actions');
+    if (!actionContainer) return;
+    
+    let html = `
+        <button class="btn-sm b10" onclick="addXPToSelected(${pointValues[0]}, 'Premio Especial (+${pointValues[0]})')">+${pointValues[0]} XP general</button>
+        <button class="btn-sm b20" onclick="addXPToSelected(${pointValues[1]}, 'Premio Extraordinario (+${pointValues[1]})')">+${pointValues[1]} XP general</button>
+    `;
+    
+    const groupRules = rewardSources.filter(r => r.type === 'group');
+    groupRules.forEach(r => {
+        html += `<button class="btn-sm" style="background:var(--purplePrimary); color:white; border-color:var(--purpleSecondary);" onclick="addXPToSelected(${r.points}, '${r.icon} ${r.title}')" title="${r.desc}">${r.icon} ${r.title} (+${r.points})</button>`;
+    });
+    
+    html += `<button class="btn-sm" style="background:var(--btnBg); color:var(--text); border-color:var(--btnBorder);" onclick="toggleSelectAll()">☑️ Alternar Presentes</button>`;
+    actionContainer.innerHTML = html;
+}
+
+function addXPToSelected(amount, customHistoryMsg = null) {
     if(amount <= 0 || selectedStudents.size === 0) return;
     let studentsAssigned = [];
     let leveledUpStudents = [];
@@ -2702,7 +2740,8 @@ function addXPToSelected(amount) {
             s.xp += Math.floor(amount);
             s.sessionXP += Math.floor(amount);
             
-            s.history.unshift({ desc: `+${amount} XP masivo`, date: new Date().toLocaleDateString() });
+            const msg = customHistoryMsg || `+${amount} XP masivo`;
+            s.history.unshift({ desc: msg, date: new Date().toLocaleDateString() });
             if(s.history.length > 30) s.history.pop();
             
             const newLevelInfo = getLevelInfo(s.xp);
@@ -2713,7 +2752,7 @@ function addXPToSelected(amount) {
             }
         }
     });
-    selectedStudents.clear();
+    // NO vaciamos la selección para mantener la asistencia
     saveData();
     renderList();
     
@@ -2734,10 +2773,6 @@ function addXPToSelected(amount) {
     }
 }
 
-function clearSelection() {
-    selectedStudents.clear();
-    renderList();
-}
 
 function triggerRowAnimation(id) {
     const row = document.getElementById('s-'+id);
@@ -2967,15 +3002,41 @@ function showShop(studentId = null) {
 }
 
 function showGuide() {
+    const individual = rewardSources.filter(s => s.type !== 'group');
+    const group = rewardSources.filter(s => s.type === 'group');
+    
+    let html = '';
+    
+    if(individual.length > 0) {
+        html += `<h3 style="color:#fff; text-align:left; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem;">🧑 Individuales</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px; margin-bottom: 25px;">`;
+        html += individual.map(s => `
+            <div class="guide-item-card" style="background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
+                <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
+                <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
+                <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
+                <div style="background:linear-gradient(135deg, #ec4899, #8b5cf6); color:white; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(236,72,153,0.4); text-shadow:0 1px 3px rgba(0,0,0,0.3); z-index:1;">+${s.points} XP</div>
+            </div>
+        `).join('');
+        html += `</div>`;
+    }
+    
+    if(group.length > 0) {
+        html += `<h3 style="color:#FBBF24; text-align:left; border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.4rem;">👥 Grupales (Para todo el curso presente)</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:15px;">`;
+        html += group.map(s => `
+            <div class="guide-item-card" style="background:rgba(251,191,36,0.05); border:1px solid rgba(251,191,36,0.4); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
+                <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
+                <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
+                <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
+                <div style="background:linear-gradient(135deg, #FBBF24, #F59E0B); color:#334155; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(251,191,36,0.4); text-shadow:0 1px 3px rgba(255,255,255,0.5); z-index:1;">+${s.points} XP</div>
+            </div>
+        `).join('');
+        html += `</div>`;
+    }
+
     const container = document.getElementById('guide-content');
-    container.innerHTML = rewardSources.map(s => `
-        <div class="guide-item-card" style="background:rgba(255,255,255,0.05); border:1px solid rgba(139,92,246,0.3); border-radius:24px; padding:20px; display:flex; flex-direction:column; align-items:center; text-align:center; transition:0.4s; box-shadow:0 10px 30px rgba(0,0,0,0.3); backdrop-filter:blur(12px); position:relative; overflow:hidden;">
-            <div style="font-size:3.5rem; margin-bottom:10px; z-index:1;">${s.icon}</div>
-            <div style="font-weight:900; font-size:1.2rem; color:#fff; margin-bottom:5px; line-height:1.2; z-index:1;">${s.title}</div>
-            <div style="font-size:0.9rem; color:rgba(255,255,255,0.7); margin-bottom:20px; flex:1; z-index:1;">${s.desc}</div>
-            <div style="background:linear-gradient(135deg, #ec4899, #8b5cf6); color:white; padding:8px 20px; border-radius:50px; font-weight:900; font-size:1.15rem; border:none; box-shadow:0 4px 15px rgba(236,72,153,0.4); text-shadow:0 1px 3px rgba(0,0,0,0.3); z-index:1;">+${s.points} XP</div>
-        </div>
-    `).join('');
+    container.innerHTML = html;
     showModal('modal-guide');
 }
 
@@ -3174,9 +3235,7 @@ function saveStudents() {
 
 
 function updateMassXPText() {
-    if(document.getElementById('txt-pt1-mass')) document.getElementById('txt-pt1-mass').innerText = pointValues[0];
-    if(document.getElementById('txt-pt2-mass')) document.getElementById('txt-pt2-mass').innerText = pointValues[1];
-    if(document.getElementById('txt-pt3-mass')) document.getElementById('txt-pt3-mass').innerText = pointValues[2];
+    // Legacy support since HTML changed, keeping empty to avoid errors
 }
 
 
@@ -3427,20 +3486,27 @@ function cfgRenderGuide() {
     list.innerHTML = rewardSources.map((s, i) => `
         <div style="background:var(--cardBg); padding:20px; border-radius:15px; border:2px solid var(--btnShadow); display:flex; flex-direction:column; gap:12px; box-shadow:0 4px 10px rgba(0,0,0,0.05);">
             <div style="display:flex; gap:10px; align-items:center;">
-                <button style="font-size:2.5rem; width:65px; height:65px; display:flex; align-items:center; justify-content:center; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:15px; cursor:pointer;" onclick="cfgOpenGuideIconPicker(${i})" title="Cambiar Icono">${s.icon}</button>
+                <button style="font-size:2.5rem; width:65px; height:65px; display:flex; align-items:center; justify-content:center; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:15px; cursor:pointer; flex-shrink:0;" onclick="cfgOpenGuideIconPicker(${i})" title="Cambiar Icono">${s.icon}</button>
                 <div style="flex:1;">
                     <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Título Regla</label>
-                    <input type="text" value="${s.title}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold;" onchange="cfgUpdateGuide(${i}, 'title', this.value)">
+                    <input type="text" value="${s.title}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; box-sizing:border-box;" onchange="cfgUpdateGuide(${i}, 'title', this.value)">
                 </div>
             </div>
             <div>
                 <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Descripción</label>
-                <textarea style="width:100%; height:60px; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-size:0.9rem; font-family:inherit;" onchange="cfgUpdateGuide(${i}, 'desc', this.value)">${s.desc}</textarea>
+                <textarea style="width:100%; height:60px; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-size:0.9rem; font-family:inherit; box-sizing:border-box;" onchange="cfgUpdateGuide(${i}, 'desc', this.value)">${s.desc}</textarea>
             </div>
             <div style="display:flex; align-items:center; gap:10px;">
                 <div style="flex:1;">
                     <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">Puntos (+XP)</label>
-                    <input type="number" value="${s.points}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; color:var(--purplePrimary);" onchange="cfgUpdateGuide(${i}, 'points', this.value)">
+                    <input type="number" value="${s.points}" style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; color:var(--purplePrimary); box-sizing:border-box;" onchange="cfgUpdateGuide(${i}, 'points', this.value)">
+                </div>
+                <div style="flex:1;">
+                    <label style="font-size:0.75rem; font-weight:bold; color:var(--subText);">A quién aplica</label>
+                    <select style="width:100%; padding:8px; border-radius:8px; border:2px solid var(--btnShadow); font-weight:bold; box-sizing:border-box; background:white;" onchange="cfgUpdateGuide(${i}, 'type', this.value)">
+                        <option value="individual" ${s.type !== 'group' ? 'selected' : ''}>🧑 Individual</option>
+                        <option value="group" ${s.type === 'group' ? 'selected' : ''}>👥 Grupal</option>
+                    </select>
                 </div>
                 <button class="btn-sm" style="background:#EF4444; color:white; height:40px; margin-top:18px;" onclick="cfgDelGuide(${i})">✖ Eliminar</button>
             </div>
@@ -3457,7 +3523,8 @@ function cfgDelGuide(i) {
     }
 }
 function cfgUpdateGuide(i, field, val) {
-    rewardSources[i][field] = field === 'points' ? (parseInt(val)||0) : val;
+    if (field === 'points') rewardSources[i][field] = parseInt(val)||0;
+    else rewardSources[i][field] = val;
     markConfigChanged();
 }
 function cfgOpenGuideIconPicker(idx) {
