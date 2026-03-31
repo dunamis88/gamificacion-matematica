@@ -54,7 +54,7 @@ body.dark-mode {
 }
 
 * { box-sizing: border-box; font-family: 'Nunito', sans-serif; }
-body { background: var(--bg); color: var(--text); margin: 0; padding: 10px; transition: background 0.4s; }
+body { background: var(--bg); color: var(--text); margin: 0; padding: 0; transition: background 0.4s; }
 h1, h2, h3 { text-align: center; margin: 5px 0 15px 0; font-weight: 900; }
 .hidden { display: none !important; }
 
@@ -65,31 +65,553 @@ h1, h2, h3 { text-align: center; margin: 5px 0 15px 0; font-weight: 900; }
     background: var(--cardBg); border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); margin-top: 15px; border: 2px solid var(--btnBg); position: relative;
 }
 
-/* Barra Superior del Dashboard */
-.top-bar { 
-  display: flex; flex-direction: column; align-items: stretch; gap: 10px;
-  margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid rgba(255,255,255,0.2);
+/* ===== BARRA SUPERIOR PREMIUM ===== */
+.premium-navbar {
+    position: sticky;
+    top: 0;
+    z-index: 500;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 4px 30px rgba(0,0,0,0.4);
+    backdrop-filter: blur(20px);
+    padding: 0 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 68px;
+    overflow: hidden;
 }
-@media (min-width: 1050px) { .top-bar { flex-direction: row; justify-content: space-between; align-items: center; } }
-.top-bar h2 { color: var(--text) !important; font-size: 1.8rem !important; margin:0 !important; text-shadow:none !important;}
-.top-bar h2 span { color: var(--subText) !important; opacity: 0.9; font-size: 1rem !important;}
 
-.top-bar-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; width: 100%; justify-content: center; }
-@media (min-width: 1050px) { .top-bar-controls { width: auto; justify-content: flex-end; flex: 1; } }
+/* Línea de acento animada inferior */
+.premium-navbar::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, #6d28d9, #2563eb, #059669, #FBBF24, #6d28d9);
+    background-size: 300% 100%;
+    animation: navbarGlow 6s linear infinite;
+}
+@keyframes navbarGlow {
+    0% { background-position: 0% 0%; }
+    100% { background-position: 300% 0%; }
+}
 
-.search-container { width: 100%; margin-bottom: 5px; }
-@media (min-width: 1050px) { .search-container { width: auto; min-width: 200px; margin-bottom: 0; margin-right: auto; margin-left: 15px; } }
+/* Info del curso a la izquierda */
+.navbar-course-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    flex: 1;
+    min-width: 0;
+    padding-right: 12px;
+}
+.navbar-course-name {
+    font-size: 1.35rem;
+    font-weight: 900;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    line-height: 1.1;
+    letter-spacing: -0.3px;
+}
+.navbar-course-mode {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+.navbar-mode-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 10px;
+    border-radius: 50px;
+    font-size: 0.72rem;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.navbar-mode-pill.teacher { background: rgba(251,191,36,0.2); color: #FBBF24; border: 1px solid rgba(251,191,36,0.3); }
+.navbar-mode-pill.student { background: rgba(16,185,129,0.2); color: #34D399; border: 1px solid rgba(16,185,129,0.3); }
+
+/* Controles de la navbar */
+.navbar-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+/* Botón base de la navbar */
+.nb-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 14px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.8);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    flex-shrink: 0;
+}
+.nb-btn:hover {
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.25);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.nb-btn:active { transform: translateY(0); }
+
+/* Botón ícono (solo icono, sin texto) */
+.nb-icon-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.12);
+    background: rgba(255,255,255,0.07);
+    color: rgba(255,255,255,0.8);
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+.nb-icon-btn:hover {
+    background: rgba(255,255,255,0.16);
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+}
+.nb-icon-btn:active { transform: translateY(0); }
+
+/* Variantes de color */
+.nb-btn-gold, .nb-btn-gold.nb-icon-btn {
+    background: rgba(251,191,36,0.18) !important;
+    border-color: rgba(251,191,36,0.35) !important;
+    color: #FBBF24 !important;
+}
+.nb-btn-gold:hover { background: rgba(251,191,36,0.3) !important; box-shadow: 0 6px 20px rgba(251,191,36,0.2) !important; }
+
+.nb-btn-purple, .nb-btn-purple.nb-icon-btn {
+    background: rgba(109,40,217,0.3) !important;
+    border-color: rgba(139,92,246,0.5) !important;
+    color: #A78BFA !important;
+}
+.nb-btn-purple:hover { background: rgba(109,40,217,0.45) !important; box-shadow: 0 6px 20px rgba(109,40,217,0.3) !important; }
+
+.nb-btn-green, .nb-btn-green.nb-icon-btn {
+    background: rgba(16,185,129,0.18) !important;
+    border-color: rgba(16,185,129,0.35) !important;
+    color: #34D399 !important;
+}
+.nb-btn-green:hover { background: rgba(16,185,129,0.3) !important; }
+
+/* Divisor de la navbar */
+.nb-divider {
+    width: 1px;
+    height: 28px;
+    background: rgba(255,255,255,0.12);
+    border-radius: 1px;
+    flex-shrink: 0;
+}
+
+/* Input de búsqueda navbar */
+.nb-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+.nb-search input {
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 12px !important;
+    color: #fff !important;
+    padding: 8px 14px 8px 36px !important;
+    font-size: 0.85rem !important;
+    font-weight: 700 !important;
+    width: 180px;
+    transition: 0.2s;
+    outline: none;
+}
+.nb-search input::placeholder { color: rgba(255,255,255,0.35); }
+.nb-search input:focus {
+    background: rgba(255,255,255,0.13) !important;
+    border-color: rgba(139,92,246,0.6) !important;
+    width: 220px;
+    box-shadow: 0 0 0 3px rgba(109,40,217,0.2) !important;
+}
+.nb-search-icon {
+    position: absolute;
+    left: 10px;
+    color: rgba(255,255,255,0.4);
+    pointer-events: none;
+}
+
+/* Avatar de perfil en navbar */
+.nb-avatar-btn {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    cursor: pointer;
+    border-radius: 50% !important;
+    transition: 0.2s;
+    width: 42px;
+    height: 42px;
+    position: relative;
+    flex-shrink: 0;
+}
+.nb-avatar-btn:hover { transform: scale(1.08) !important; }
+.nb-avatar-ring {
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    border: 2.5px solid rgba(139,92,246,0.8);
+    box-shadow: 0 0 12px rgba(109,40,217,0.4);
+    overflow: hidden;
+    background: #6d28d9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+.nb-avatar-ring img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    display: block;
+}
+.nb-avatar-initials {
+    display: none;
+    color: #fff;
+    font-weight: 900;
+    font-size: 1rem;
+    font-family: 'Nunito', sans-serif;
+}
+
+/* Barra de selección masiva */
+#selection-bar {
+    background: rgba(59,130,246,0.12) !important;
+    border: 1px solid rgba(59,130,246,0.3) !important;
+    padding: 10px 20px !important;
+    border-radius: 16px !important;
+    box-shadow: none !important;
+    margin: 10px 20px 0;
+    flex-wrap: wrap;
+}
+#selection-bar span { color: #93C5FD !important; font-size: 1rem !important; font-weight: 900 !important;}
+
+/* Contenido del dashboard */
+#view-dash { padding: 0; max-width: 100%; }
+.dash-content { padding: 16px 20px; max-width: 1400px; margin: 0 auto; }
+
+/* Mantener compatibilidad estilos legacy que se usan internamente */
+.top-bar-controls { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .search-container input { border-radius: 12px !important; border: 2px solid var(--purplePrimary) !important; padding: 8px 12px !important; background: #FFF !important; box-shadow:none !important;}
-
-.top-bar button { 
-  padding: 10px 18px !important; border-radius: 14px !important; border: 2px solid var(--btnBorder) !important; border-bottom-width: 4px !important; color: var(--btnText) !important;
-  font-weight: 800 !important; cursor: pointer; background: var(--btnBg) !important; box-shadow: none !important;
-  transition: 0.15s; font-size: 0.95rem !important; text-transform: uppercase;
-}
+.top-bar button { padding: 10px 18px !important; border-radius: 14px !important; border: 2px solid var(--btnBorder) !important; border-bottom-width: 4px !important; color: var(--btnText) !important; font-weight: 800 !important; cursor: pointer; background: var(--btnBg) !important; box-shadow: none !important; transition: 0.15s; font-size: 0.95rem !important; text-transform: uppercase; }
 .top-bar button:hover { transform: translateY(-2px); filter: brightness(0.95); }
 .top-bar button:active { border-bottom-width: 2px !important; transform: translateY(0); }
-.top-bar button.student-only, .top-bar button[onclick^="showShop"] { background: var(--yellowPrimary) !important; color: #78350F !important; border-color: #F59E0B !important; }
-.top-bar button[onclick="openConfig()"] { background: var(--purplePrimary) !important; color: #FFF !important; border-color: #6D28D9 !important; }
+
+/* ===== PANEL DE CONFIGURACIÓN PREMIUM ===== */
+.cfg-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.cfg-panel {
+    display: flex;
+    width: 100%;
+    max-width: 1100px;
+    background: #0f172a;
+    border-radius: 0;
+    overflow: hidden;
+    animation: slideInRight 0.3s cubic-bezier(0.34,1.2,0.64,1);
+    position: relative;
+    margin: 0 auto;
+}
+@media (min-width: 700px) { .cfg-panel { border-radius: 24px; margin: 20px; animation: scaleIn 0.3s cubic-bezier(0.34,1.2,0.64,1); } }
+@keyframes scaleIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes slideInRight { from { transform: translateX(100%); } to { transform: translateX(0); } }
+
+/* Sidebar de configuración */
+.cfg-sidebar {
+    width: 220px;
+    flex-shrink: 0;
+    background: rgba(255,255,255,0.04);
+    border-right: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    flex-direction: column;
+    padding: 24px 0;
+    overflow-y: auto;
+}
+@media (max-width: 699px) { .cfg-sidebar { width: 60px; } }
+
+.cfg-sidebar-header {
+    padding: 0 20px 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    margin-bottom: 16px;
+}
+@media (max-width: 699px) { .cfg-sidebar-header { padding: 0 10px 20px; } }
+.cfg-sidebar-title {
+    font-size: 1.1rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 2px;
+}
+.cfg-sidebar-sub {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.4);
+    font-weight: 700;
+}
+@media (max-width: 699px) { .cfg-sidebar-title, .cfg-sidebar-sub { display: none; } }
+
+.cfg-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 11px 20px;
+    cursor: pointer;
+    transition: 0.2s;
+    border-radius: 0;
+    color: rgba(255,255,255,0.5);
+    font-weight: 800;
+    font-size: 0.88rem;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: 'Nunito', sans-serif;
+    position: relative;
+}
+@media (max-width: 699px) { .cfg-nav-item { padding: 12px; justify-content: center; } }
+.cfg-nav-item .cfg-nav-label { @media (max-width: 699px) { display: none; } }
+.cfg-nav-item:hover {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.85);
+}
+.cfg-nav-item.active {
+    background: rgba(109,40,217,0.2);
+    color: #A78BFA;
+    border-left: 3px solid #8B5CF6;
+}
+.cfg-nav-item.active .cfg-nav-icon { color: #A78BFA; }
+.cfg-nav-icon { font-size: 1.3rem; flex-shrink: 0; }
+
+/* Contenido del panel */
+.cfg-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-width: 0;
+}
+.cfg-content-header {
+    background: linear-gradient(135deg, #1e1b4b, #0f172a);
+    padding: 20px 28px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-shrink: 0;
+}
+.cfg-content-title {
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.cfg-close-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(239,68,68,0.15);
+    color: #FCA5A5;
+    cursor: pointer;
+    font-size: 1.1rem;
+    font-weight: 900;
+    transition: 0.2s;
+    flex-shrink: 0;
+    font-family: 'Nunito', sans-serif;
+}
+.cfg-close-btn:hover { background: rgba(239,68,68,0.35); color: #fff; }
+
+.cfg-section-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,0.15) transparent;
+}
+
+/* Tarjeta dentro del config */
+.cfg-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 18px;
+    padding: 22px 24px;
+    margin-bottom: 20px;
+    transition: 0.2s;
+}
+.cfg-card:hover { background: rgba(255,255,255,0.07); }
+.cfg-card-title {
+    font-size: 0.85rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.cfg-card-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 1px;
+}
+
+/* Inputs premium dentro del config */
+.cfg-card input, .cfg-card select, .cfg-card textarea {
+    background: rgba(255,255,255,0.07) !important;
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    color: #fff !important;
+    border-radius: 12px !important;
+    padding: 10px 14px !important;
+    font-size: 0.95rem !important;
+    font-weight: 700 !important;
+    transition: 0.2s;
+}
+.cfg-card input::placeholder, .cfg-card textarea::placeholder { color: rgba(255,255,255,0.3) !important; }
+.cfg-card input:focus, .cfg-card select:focus, .cfg-card textarea:focus {
+    border-color: rgba(139,92,246,0.6) !important;
+    background: rgba(255,255,255,0.1) !important;
+    box-shadow: 0 0 0 3px rgba(109,40,217,0.2) !important;
+    outline: none;
+}
+.cfg-card select option { background: #1e1b4b; color: #fff; }
+
+/* Botones dentro del config */
+.cfg-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.15);
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+.cfg-btn:hover { background: rgba(255,255,255,0.15); transform: translateY(-1px); }
+.cfg-btn-purple { background: rgba(109,40,217,0.3) !important; border-color: rgba(139,92,246,0.5) !important; color: #C4B5FD !important; }
+.cfg-btn-purple:hover { background: rgba(109,40,217,0.5) !important; }
+.cfg-btn-green { background: rgba(16,185,129,0.2) !important; border-color: rgba(52,211,153,0.4) !important; color: #6EE7B7 !important; }
+.cfg-btn-green:hover { background: rgba(16,185,129,0.35) !important; }
+.cfg-btn-gold { background: rgba(251,191,36,0.2) !important; border-color: rgba(251,191,36,0.4) !important; color: #FCD34D !important; }
+.cfg-btn-gold:hover { background: rgba(251,191,36,0.35) !important; }
+.cfg-btn-red { background: rgba(239,68,68,0.15) !important; border-color: rgba(239,68,68,0.3) !important; color: #FCA5A5 !important; }
+.cfg-btn-red:hover { background: rgba(239,68,68,0.3) !important; }
+
+/* Lista de cursos en config */
+.cfg-course-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    margin-bottom: 8px;
+    transition: 0.2s;
+    color: #fff;
+    font-weight: 800;
+    font-size: 0.95rem;
+}
+.cfg-course-item:hover { background: rgba(255,255,255,0.09); }
+
+/* Tarjeta estudiante en config */
+.cfg-student-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 14px;
+    padding: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    transition: 0.2s;
+}
+.cfg-student-card:hover { background: rgba(255,255,255,0.09); }
+
+/* Número de puntos en config */
+.cfg-pts-box {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+}
+.cfg-pts-label {
+    font-size: 0.75rem;
+    font-weight: 900;
+    color: rgba(255,255,255,0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.cfg-pts-input {
+    text-align: center !important;
+    font-size: 1.6rem !important;
+    font-weight: 900 !important;
+    color: #FBBF24 !important;
+    background: rgba(251,191,36,0.1) !important;
+    border-color: rgba(251,191,36,0.3) !important;
+    width: 100%;
+    border-radius: 14px !important;
+    padding: 14px 10px !important;
+}
+.cfg-pts-input:focus { border-color: rgba(251,191,36,0.7) !important; box-shadow: 0 0 0 3px rgba(251,191,36,0.15) !important; }
 
 /* Reglas de Visibilidad por Rol - Alta Especificidad para ganar a flex/grid !important */
 body[data-role="student"] .teacher-only { display: none !important; }
@@ -1037,94 +1559,116 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 </div>
 
 <!-- VISTA 3: Pizarra Principal -->
-<div id="view-dash" class="view hidden">
-    <div class="top-bar">
-        <h2 id="course-title" style="margin:0; font-size:1.8rem; text-align:left;">--- <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span></h2>
-        
-        <div class="top-bar-controls" style="justify-content:flex-end; flex-wrap:wrap; gap:6px;">
+<div id="view-dash" class="view hidden" style="max-width:100%; padding:0;">
+    <!-- BARRA PREMIUM -->
+    <nav class="premium-navbar" id="premium-navbar">
+        <!-- Info del curso -->
+        <div class="navbar-course-info">
+            <div class="navbar-course-name" id="course-title">---</div>
+            <div class="navbar-course-mode">
+                <span class="navbar-mode-pill teacher teacher-only" id="mode-indicator">👩‍🏫 Profesor</span>
+                <span class="navbar-mode-pill student student-only" id="mode-indicator-student">🎓 Pizarra</span>
+            </div>
+        </div>
 
-            <!-- GRUPO 1: Foto de perfil + Home -->
-            <button id="user-profile-btn" onclick="toggleUserMenu()" title="Mi cuenta" style="display:none; align-items:center; justify-content:center; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; cursor:pointer; border-radius:50% !important; transition:0.2s; width:44px; height:44px; position:relative; flex-shrink:0;">
-                <div id="user-avatar-wrap" style="width:40px; height:40px; border-radius:50%; border:3px solid var(--purplePrimary); box-shadow:0 2px 8px rgba(0,0,0,0.25); overflow:hidden; background:var(--purplePrimary); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-                    <img id="user-avatar" src="" width="40" height="40" style="width:100%; height:100%; object-fit:cover; display:block; border-radius:50%;" onerror="this.style.display='none'; document.getElementById('user-avatar-initials').style.display='flex';">
-                    <span id="user-avatar-initials" style="display:none; color:#fff; font-weight:900; font-size:1.1rem; font-family:'Nunito',sans-serif; line-height:1;"></span>
-                </div>
-            </button>
-            <button onclick="goHomeFromDash()" title="Pantalla de Inicio" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+        <!-- Controles -->
+        <div class="navbar-controls">
 
-            <!-- Separador visual -->
-            <div style="width:2px; height:32px; background:var(--btnBorder); border-radius:2px; flex-shrink:0;"></div>
-
-            <!-- GRUPO 2: Vista y Ordenamiento -->
-            <button id="btn-view-toggle" onclick="toggleViewMode()" title="Cambiar Vista (Cuadrícula / Lista)" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;">
-                <svg id="svg-view-grid" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-                <svg id="svg-view-list" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
-            </button>
-            <button id="btn-sort-xp" onclick="changeSort('xp')" title="Ordenar por Puntos (Ranking)" style="display:flex; align-items:center; justify-content:center; padding: 8px 12px !important; background: var(--yellowPrimary) !important; color: #78350F !important; border-color: #F59E0B !important; gap: 4px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg>
-                <span style="font-size:0.8rem; font-weight:900;">PTS</span>
-            </button>
-            <button id="btn-sort-alpha" onclick="changeSort('alpha')" title="Ordenar Alfabéticamente (A-Z)" style="display:flex; align-items:center; justify-content:center; padding: 8px 12px !important; gap: 4px;">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/><path d="M3 16l4 4 4-4"/><path d="M7 20V4"/></svg>
-                <span style="font-size:0.8rem; font-weight:900;">A-Z</span>
-            </button>
-
-            <!-- Separador visual -->
-            <div style="width:2px; height:32px; background:var(--btnBorder); border-radius:2px; flex-shrink:0;"></div>
-
-            <!-- GRUPO 3: Búsqueda -->
-            <div class="search-container" style="flex:1; min-width:160px; max-width:260px;">
-                <input type="text" id="search-input" placeholder="🔍 Buscar alumno..." style="padding:10px 14px; border-radius:10px; border:2px solid var(--btnShadow); background:var(--bg); color:var(--text); font-family:'Nunito'; font-weight: 800; width: 100%; outline:none; transition: 0.2s;" oninput="onSearch(this.value)">
+            <!-- Búsqueda -->
+            <div class="nb-search">
+                <svg class="nb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="onSearch(this.value)">
             </div>
 
-            <!-- Separador visual -->
-            <div style="width:2px; height:32px; background:var(--btnBorder); border-radius:2px; flex-shrink:0;"></div>
+            <div class="nb-divider"></div>
 
-            <!-- GRUPO 4: Acceso a Contenidos (todos) -->
-            <button id="btn-show-guide" onclick="showGuide()" title="Manual de Puntos" style="display:flex; align-items:center; justify-content:center; gap:5px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía</button>
-            <button onclick="showShop()" title="Tienda de Recompensas" style="display:flex; align-items:center; justify-content:center; gap:5px;"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg> Tienda</button>
-            <button onclick="showPodium()" title="Salón de la Fama" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg></button>
+            <!-- Vista y orden -->
+            <button id="btn-view-toggle" class="nb-icon-btn" onclick="toggleViewMode()" title="Cambiar Vista">
+                <svg id="svg-view-grid" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="hidden"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+                <svg id="svg-view-list" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            </button>
+            <button id="btn-sort-xp" class="nb-btn nb-btn-gold" onclick="changeSort('xp')" title="Ordenar por Puntos">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="6"/><path d="M15.477 12.89 17 22l-5-3-5 3 1.523-9.11"/></svg> PTS
+            </button>
+            <button id="btn-sort-alpha" class="nb-btn" onclick="changeSort('alpha')" title="Orden A-Z">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4h10"/><path d="M11 8h7"/><path d="M11 12h4"/><path d="M3 16l4 4 4-4"/><path d="M7 20V4"/></svg> A-Z
+            </button>
 
-            <!-- Separador visual -->
-            <div style="width:2px; height:32px; background:var(--btnBorder); border-radius:2px; flex-shrink:0;"></div>
+            <div class="nb-divider"></div>
 
-            <!-- GRUPO 5: Modos y Configuración -->
-            <button id="btn-toggle-role" onclick="toggleRole()" title="Cambiar Modo">👀 Modo Est.</button>
-            <button class="teacher-only" onclick="openConfig()" title="Configuración" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+            <!-- Acciones -->
+            <button id="btn-show-guide" class="nb-btn" onclick="showGuide()" title="Manual de Puntos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía
+            </button>
+            <button class="nb-btn nb-btn-gold" onclick="showShop()" title="Tienda">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Tienda
+            </button>
+            <button class="nb-icon-btn" onclick="showPodium()" title="Salón de la Fama">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></svg>
+            </button>
+
+            <div class="nb-divider"></div>
+
+            <!-- Modo + Home + Config + Avatar -->
+            <button id="btn-toggle-role" class="nb-btn nb-btn-green teacher-only" onclick="toggleRole()" title="Cambiar Modo">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Est.
+            </button>
+            <button id="btn-toggle-role-back" class="nb-btn nb-btn-gold student-only" onclick="toggleRole()" title="Volver a Profesor">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profe
+            </button>
+            <button class="nb-icon-btn teacher-only" onclick="goHomeFromDash()" title="Inicio">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </button>
+            <button class="nb-icon-btn student-only" onclick="goHomeFromDash()" title="Inicio">
+                <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+            </button>
+            <button class="nb-icon-btn nb-btn-purple teacher-only" onclick="openConfig()" title="Configuración">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </button>
+
+            <!-- Avatar perfil Google (al final) -->
+            <button id="user-profile-btn" class="nb-avatar-btn" onclick="toggleUserMenu()" title="Mi cuenta">
+                <div class="nb-avatar-ring" id="user-avatar-wrap">
+                    <img id="user-avatar" src="" alt="" style="display:block;" onerror="this.style.display='none'; document.getElementById('user-avatar-initials').style.display='flex';">
+                    <span id="user-avatar-initials" class="nb-avatar-initials"></span>
+                </div>
+            </button>
 
         </div>
-    </div>
+    </nav>
     
-    <div id="selection-bar" class="teacher-only hidden" style="background:var(--selectionBarBg); padding:10px 20px; border-radius:12px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; border: 2px dashed #3B82F6; transition: background 0.3s;">
-        <span id="selection-count" style="font-weight:900; color:var(--selectionBarText); transition: color 0.3s;">0 estudiantes seleccionados</span>
-        <div style="display:flex; gap:10px; flex-wrap:wrap;">
-            <button class="btn-sm b10" onclick="addXPToSelected(pointValues[0])">+<span id="txt-pt1-mass"></span> a todos</button>
-            <button class="btn-sm b20" onclick="addXPToSelected(pointValues[1])">+<span id="txt-pt2-mass"></span> a todos</button>
-            <button class="btn-sm b50" onclick="addXPToSelected(pointValues[2])">+<span id="txt-pt3-mass"></span> a todos</button>
-            <button class="btn-sm" style="background:var(--btnBg); color:var(--text);" onclick="clearSelection()">Desmarcar</button>
+    <div class="dash-content">
+        <div id="selection-bar" class="teacher-only hidden" style="display:flex; justify-content:space-between; align-items:center; transition: background 0.3s; margin-bottom:15px;">
+            <span id="selection-count" style="font-weight:900; transition: color 0.3s;">0 estudiantes seleccionados</span>
+            <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                <button class="btn-sm b10" onclick="addXPToSelected(pointValues[0])">+<span id="txt-pt1-mass"></span> a todos</button>
+                <button class="btn-sm b20" onclick="addXPToSelected(pointValues[1])">+<span id="txt-pt2-mass"></span> a todos</button>
+                <button class="btn-sm b50" onclick="addXPToSelected(pointValues[2])">+<span id="txt-pt3-mass"></span> a todos</button>
+                <button class="btn-sm" style="background:var(--btnBg); color:var(--text);" onclick="clearSelection()">Desmarcar</button>
+            </div>
         </div>
-    </div>
 
-    <div id="list-container" class="grid">
-        <!-- Renderizado Vía JS -->
+        <div id="list-container" class="grid">
+            <!-- Renderizado Vía JS -->
+        </div>
     </div>
 </div>
 
 
 
-<!-- Modal Menu de Usuario -->
-<div id="modal-user-menu" class="hidden" style="position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:5000; background:var(--modalBg); border-radius:20px; padding:20px; box-shadow:0 10px 40px rgba(0,0,0,0.25); border:2px solid var(--btnBorder); min-width:280px; text-align:center;">
-    <div style="display:flex; align-items:center; gap:12px; padding:10px; background:var(--rowBg); border-radius:14px; margin-bottom:15px;">
-        <img id="menu-user-avatar" src="" width="48" height="48" style="border-radius:50%; object-fit:cover; border:3px solid var(--purplePrimary); flex-shrink:0;">
+<!-- Modal Menu de Usuario (Premium dark) -->
+<div id="modal-user-menu" class="hidden" style="position:fixed; top:76px; right:16px; z-index:5000; background:#0f172a; border:1px solid rgba(255,255,255,0.12); border-radius:20px; padding:16px; box-shadow:0 20px 60px rgba(0,0,0,0.6); min-width:280px; text-align:center; backdrop-filter:blur(20px);">
+    <div style="display:flex; align-items:center; gap:12px; padding:12px; background:rgba(255,255,255,0.06); border-radius:14px; border:1px solid rgba(255,255,255,0.08); margin-bottom:14px;">
+        <img id="menu-user-avatar" src="" width="48" height="48" style="border-radius:50%; object-fit:cover; border:2.5px solid rgba(139,92,246,0.8); box-shadow:0 0 12px rgba(109,40,217,0.4); flex-shrink:0;">
         <div style="text-align:left;">
-            <div id="menu-user-name" style="font-weight:900; font-size:1.1rem; color:var(--text);"></div>
-            <div id="menu-user-email" style="font-size:0.8rem; color:var(--subText); font-weight:800;"></div>
+            <div id="menu-user-name" style="font-weight:900; font-size:1rem; color:#fff;"></div>
+            <div id="menu-user-email" style="font-size:0.78rem; color:rgba(255,255,255,0.45); font-weight:700;"></div>
         </div>
     </div>
-    <button onclick="toggleUserMenu()" style="width:100%; padding:12px; margin-bottom:8px; border:2px solid var(--btnBorder); border-bottom-width:4px; border-radius:14px; background:var(--purplePrimary); color:#FFF; font-family:'Nunito'; font-weight:900; font-size:1rem; cursor:pointer;">
+    <button onclick="toggleUserMenu()" style="width:100%; padding:12px; margin-bottom:8px; border:1px solid rgba(139,92,246,0.5); border-radius:14px; background:rgba(109,40,217,0.3); color:#C4B5FD; font-family:'Nunito'; font-weight:900; font-size:0.95rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(109,40,217,0.5)'" onmouseout="this.style.background='rgba(109,40,217,0.3)'">
         ✅ Continuar como Profesor
     </button>
-    <button onclick="signOut()" style="width:100%; padding:12px; border:2px solid #FECACA; border-bottom-width:4px; border-radius:14px; background:#FEE2E2; color:#DC2626; font-family:'Nunito'; font-weight:900; font-size:1rem; cursor:pointer;">
+    <button onclick="signOut()" style="width:100%; padding:12px; border:1px solid rgba(239,68,68,0.3); border-radius:14px; background:rgba(239,68,68,0.12); color:#FCA5A5; font-family:'Nunito'; font-weight:900; font-size:0.95rem; cursor:pointer; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.25)'" onmouseout="this.style.background='rgba(239,68,68,0.12)'">
         🚪 Cerrar Sesión
     </button>
 </div>
