@@ -2117,6 +2117,11 @@ let myLastEventId = null;
 
 let undoStack = [];
 let redoStack = [];
+let TEACHER_PIN = '123456';
+try { 
+    const localPin = localStorage.getItem('gamificacion_teacher_pin');
+    if (localPin) TEACHER_PIN = localPin;
+} catch(e){}
 
 let badgesConfig = [
     { name: 'Participación', icon: '💡', points: 20 },
@@ -2422,6 +2427,7 @@ async function loadDataFromFirestore(uid) {
             if (data.guide) rewardSources = data.guide;
             if (data.points) pointValues = data.points;
             if (data.badgesConfig) badgesConfig = data.badgesConfig;
+            if (data.teacherPin) TEACHER_PIN = data.teacherPin;
             
             // Sincronizar eventos (Toasts / LevelUp)
             if (data.lastEvent && data.lastEvent.id !== lastProcessedEventId) {
@@ -2482,6 +2488,7 @@ async function saveData() {
                 guide: rewardSources,
                 points: pointValues,
                 badgesConfig: badgesConfig,
+                teacherPin: TEACHER_PIN,
                 lastEvent: lastFirebaseEvent,
                 updatedAt: firebase.firestore.FieldValue.serverTimestamp()
             });
@@ -2500,9 +2507,6 @@ async function saveData() {
 
 // ===== PIN MODAL LOGIC =====
 let pinValue = '';
-let TEACHER_PIN = null;
-try { TEACHER_PIN = localStorage.getItem('gamificacion_teacher_pin'); } catch(e){}
-if(!TEACHER_PIN) TEACHER_PIN = '243524';
 
 function requestTeacherPin() {
     pinValue = '';
@@ -4125,7 +4129,8 @@ function cfgSaveNewPin() {
     }
     TEACHER_PIN = val;
     localStorage.setItem('gamificacion_teacher_pin', val);
-    alert("✅ ¡Contraseña (PIN) actualizada con éxito! La próxima vez que inicies sesión, usa el nuevo PIN.");
+    saveData(); // Sincronización instantánea con la nube
+    alert("✅ ¡Contraseña (PIN) actualizada con éxito! Se ha sincronizado en todos tus dispositivos.");
     input.value = '';
 }
 
