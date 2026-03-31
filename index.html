@@ -1984,6 +1984,16 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
                         </button>
                         <input type="file" id="import-input" class="hidden" accept=".json" onchange="importData(event)">
                     </div>
+
+                    <div style="margin-top:40px; padding:25px; border:2px solid rgba(239,68,68,0.3); border-radius:20px; background:rgba(239,68,68,0.05);">
+                        <h4 style="color:#FCA5A5; margin-top:0; font-size:1.3rem; margin-bottom:10px; display:flex; align-items:center; gap:8px;">⚠️ Zona de Peligro</h4>
+                        <p style="color:rgba(255,255,255,0.7); font-size:1rem; margin-bottom:20px;">Utiliza estas opciones con extrema precaución. Los cambios son permanentes.</p>
+                        <button class="btn-sm" style="background:#EF4444; color:#fff; padding:15px 25px; border-radius:12px; border:none; font-weight:900; font-size:1.1rem; cursor:pointer; width:100%; transition:0.2s;" onclick="cfgResetCourse()">
+                            🔥 REINICIAR PUNTOS Y ORO DEL CURSO SELECCIONADO
+                        </button>
+                    </div>
+                </div>
+            </div>
                 </div>
             </div>
 
@@ -4106,11 +4116,12 @@ function importData(event) {
         try {
             const data = JSON.parse(e.target.result);
             if(confirm("⚠️ ¿Estás seguro de que quieres CARGAR esta copia? Se borrarán todos los datos actuales y se reemplazarán por los del archivo.")) {
-                if(data.courses) localStorage.setItem('gamificacion_cursos', JSON.stringify(data.courses));
-                if(data.courseIcons) localStorage.setItem('gamificacion_course_icons', JSON.stringify(data.courseIcons));
-                if(data.shop) localStorage.setItem('gamificacion_shop', JSON.stringify(data.shop));
-                if(data.guide) localStorage.setItem('gamificacion_guide', JSON.stringify(data.guide));
-                if(data.points) localStorage.setItem('gamificacion_points', JSON.stringify(data.points));
+                if(data.courses) courses = data.courses;
+                if(data.courseIcons) courseIcons = data.courseIcons;
+                if(data.shop) shopItems = data.shop;
+                if(data.guide) rewardSources = data.guide;
+                if(data.points) pointValues = data.points;
+                saveData();
                 alert("¡Datos cargados con éxito! La página se recargará.");
                 location.reload();
             }
@@ -4120,6 +4131,33 @@ function importData(event) {
     };
     reader.readAsText(file);
     event.target.value = ''; // Reset input
+}
+
+
+function cfgResetCourse() {
+    const c = document.getElementById('cfg-course-sel').value;
+    if(!c) return alert("⚠️ Selecciona un curso primero en la pestaña 'Gestión Estudiantes'.");
+    
+    const confirm1 = confirm(`❗ ATENCIÓN: Estás a punto de REINICIAR TODO el curso "${c}".\n\n- XP volverá a 0 (Nivel 1)\n- Oro volverá a 0\n- Se borrarán insignias e inventarios.\n\n¿Deseas continuar?`);
+    if(!confirm1) return;
+    
+    const confirm2 = confirm(`⚠️ ÚLTIMA ADVERTENCIA: Esta acción es irreversible y afectará a los ${courses[c].length} estudiantes de este curso. ¿Estás COMPLETAMENTE seguro?`);
+    if(!confirm2) return;
+    
+    courses[c].forEach(s => {
+        s.xp = 0;
+        s.gold = 0;
+        s.badges = [];
+        s.inventory = [];
+        s.history = [{ desc: "🔄 Reinicio total del curso", date: new Date().toLocaleDateString() }];
+        s.sessionXP = 0;
+        s.sessionBadges = [];
+    });
+    
+    saveData();
+    markConfigChanged();
+    alert(`✅ El curso "${c}" ha sido reiniciado con éxito.`);
+    if(currentCourse === c) renderList();
 }
 
 function cfgSaveNewPin() {
