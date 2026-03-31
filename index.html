@@ -2389,15 +2389,15 @@ document.addEventListener('click', function(e) {
     }
 });
 
+let isFirstLoad = true;
 async function loadDataFromFirestore(uid) {
-    // Si ya hay un listener activo, lo cancelamos antes de crear uno nuevo
     if (window.firestoreUnsubscribe) window.firestoreUnsubscribe();
     
     window.firestoreUnsubscribe = db.collection('teachers').doc(uid).onSnapshot(snap => {
         if (snap.exists) {
             const data = snap.data();
-            const oldCourses = JSON.parse(JSON.stringify(courses)); // Clon para comparar
             
+            // Cargar datos
             if (data.courses) courses = data.courses;
             if (data.courseIcons) courseIcons = data.courseIcons;
             if (data.shop) shopItems = data.shop;
@@ -2405,28 +2405,38 @@ async function loadDataFromFirestore(uid) {
             if (data.points) pointValues = data.points;
             if (data.badgesConfig) badgesConfig = data.badgesConfig;
             
-            // Detectar si hubo un evento remoto nuevo para mostrar notificación
+            // Sincronizar eventos (Toasts / LevelUp)
             if (data.lastEvent && data.lastEvent.id !== lastProcessedEventId) {
                 lastProcessedEventId = data.lastEvent.id;
-                // Solo disparamos el toast si el cambio vino de OTRO dispositivo (o si somos pantalla de estudiante)
-                // Para simplificar, lo disparamos siempre que no lo hayamos procesado localmente
-                if (data.lastEvent.type === 'points') {
-                    showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, data.lastEvent.icon || '✨', true);
-                }
-                if (data.lastEvent.type === 'levelUp') {
-                    showLevelUp(data.lastEvent.studentName, data.lastEvent.level);
-                }
-                if (data.lastEvent.type === 'badge') {
-                    showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
+                if (!isFirstLoad) { // No disparar alertas de cosas pasadas en la primera carga
+                    if (data.lastEvent.type === 'points') {
+                        showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, data.lastEvent.icon || '✨', true);
+                    }
+                    if (data.lastEvent.type === 'levelUp') {
+                        showLevelUp(data.lastEvent.studentName, data.lastEvent.level);
+                    }
+                    if (data.lastEvent.type === 'badge') {
+                        showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
+                    }
                 }
             }
             
-            // Refrescar vistas si estamos en ellas
-            if (currentCourse) renderList(); 
-            else renderCourses();
+            // Navegación Inicial
+            if (isFirstLoad) {
+                isFirstLoad = false;
+                switchView('roles'); // Mover esto fuera del snapshot causaba que la carga asíncrona no mostrara nada
+            } else {
+                // Refrescar vistas en tiempo real
+                if (currentCourse) renderList(); 
+                else renderCourses();
+            }
+        } else if (isFirstLoad) {
+            isFirstLoad = false;
+            switchView('roles');
         }
     }, err => {
         console.warn('Error en listener de Firestore:', err);
+        if (isFirstLoad) { isFirstLoad = false; switchView('roles'); }
     });
 }
 
