@@ -2872,6 +2872,8 @@ function renderSelectionBarActions() {
     let html = `
         <button class="btn-sm b10" onclick="addXPToSelected(${pointValues[0]}, 'Premio Especial (+${pointValues[0]})')">+${pointValues[0]} XP general</button>
         <button class="btn-sm b20" onclick="addXPToSelected(${pointValues[1]}, 'Premio Extraordinario (+${pointValues[1]})')">+${pointValues[1]} XP general</button>
+        <button class="btn-sm" style="background:#FEE2E2; color:#EF4444; border-color:#FECACA; font-weight:900;" onclick="addXPToSelected(-2, 'Corrección (-2)')">-2 XP (Ajuste)</button>
+        <button class="btn-sm" style="background:#FEE2E2; color:#EF4444; border-color:#FECACA; font-weight:900;" onclick="addXPToSelected(-5, 'Corrección (-5)')">-5 XP (Ajuste)</button>
     `;
     
     const groupRules = rewardSources.filter(r => r.type === 'group');
