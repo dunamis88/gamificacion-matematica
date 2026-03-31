@@ -1465,44 +1465,20 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 </head>
 <body data-role="student">
 
-<!-- OVERLAY DE LOGIN PREMIUM -->
-<div id="login-overlay" style="position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:20px;">
-    <!-- Fondo animado -->
-    <div style="position:absolute; inset:0; background:linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%); z-index:0;"></div>
-    <!-- Orbs animados -->
-    <div style="position:absolute; width:600px; height:600px; border-radius:50%; background:rgba(109,40,217,0.25); filter:blur(80px); top:-200px; left:-150px; animation:orbFloat 8s ease-in-out infinite; z-index:0;"></div>
-    <div style="position:absolute; width:500px; height:500px; border-radius:50%; background:rgba(37,99,235,0.2); filter:blur(80px); bottom:-150px; right:-100px; animation:orbFloat 10s ease-in-out infinite reverse; z-index:0;"></div>
-    <div style="position:absolute; width:300px; height:300px; border-radius:50%; background:rgba(16,185,129,0.15); filter:blur(60px); top:50%; left:50%; transform:translate(-50%,-50%); animation:orbFloat 6s ease-in-out infinite 2s; z-index:0;"></div>
-    <!-- Línea de acento superior -->
-    <div style="position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,#6d28d9,#2563eb,#059669,#FBBF24,#6d28d9); background-size:300% 100%; animation:navbarGlow 6s linear infinite; z-index:1;"></div>
-
-    <!-- Tarjeta principal -->
-    <div style="position:relative; z-index:10; background:rgba(15,23,42,0.85); backdrop-filter:blur(30px); border:1px solid rgba(255,255,255,0.12); border-radius:32px; padding:48px 40px; max-width:440px; width:100%; text-align:center; box-shadow:0 40px 80px rgba(0,0,0,0.6); animation:scaleIn 0.5s cubic-bezier(0.34,1.2,0.64,1);">
-        <!-- Logo animado -->
-        <div style="font-size:5rem; margin-bottom:16px; display:block; animation:iconScale 3s ease-in-out infinite alternate; filter:drop-shadow(0 8px 20px rgba(109,40,217,0.5));">🚀</div>
-        <h1 style="font-size:2.2rem; color:#fff; margin:0 0 8px; font-weight:900; letter-spacing:-0.5px; text-shadow:0 2px 10px rgba(0,0,0,0.3);">Aventura Matemática</h1>
-        <p style="color:rgba(255,255,255,0.45); font-weight:800; margin:0 0 36px; font-size:1rem; letter-spacing:0.5px; text-transform:uppercase;">Gamificación de Aula</p>
-
-        <!-- Línea divisora -->
-        <div style="height:1px; background:rgba(255,255,255,0.1); margin-bottom:28px; border-radius:1px;"></div>
-
-        <!-- Botón Google -->
-        <button id="btn-google-login" onclick="loginWithGoogle()" style="display:flex; align-items:center; justify-content:center; gap:14px; width:100%; padding:18px 20px; border:1px solid rgba(255,255,255,0.18); border-radius:18px; background:rgba(255,255,255,0.08); cursor:pointer; font-family:'Nunito',sans-serif; font-weight:900; font-size:1.05rem; color:#fff; margin-bottom:14px; transition:all 0.2s; backdrop-filter:blur(10px); position:relative; overflow:hidden;"
-            onmouseover="this.style.background='rgba(255,255,255,0.15)'; this.style.borderColor='rgba(255,255,255,0.3)'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 10px 30px rgba(0,0,0,0.3)';"
-            onmouseout="this.style.background='rgba(255,255,255,0.08)'; this.style.borderColor='rgba(255,255,255,0.18)'; this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-            <svg width="22" height="22" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-            <span id="google-btn-text">Iniciar sesión con Google</span>
-            <span style="font-size:0.75rem; color:rgba(255,255,255,0.45); font-weight:700; margin-left:4px;">(Profesor)</span>
+<!-- OVERLAY DE LOGIN -->
+<div id="login-overlay" style="position:fixed; inset:0; z-index:9999; background:linear-gradient(135deg, #667eea 0%, #764ba2 100%); display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#FFF; border-radius:30px; padding:40px 35px; max-width:420px; width:100%; text-align:center; box-shadow:0 30px 60px rgba(0,0,0,0.3);">
+        <div style="font-size:4rem; margin-bottom:10px;">🚀</div>
+        <h1 style="font-size:2rem; color:#334155; margin:0 0 5px; font-weight:900;">Aventura Matemática</h1>
+        <p style="color:#94A3B8; font-weight:800; margin-bottom:30px;">Gamificación de Aula</p>
+        <button id="btn-google-login" onclick="loginWithGoogle()" style="display:flex; align-items:center; justify-content:center; gap:12px; width:100%; padding:16px; border:2px solid #E2E8F0; border-bottom-width:4px; border-radius:16px; background:#FFF; cursor:pointer; font-family:'Nunito'; font-weight:900; font-size:1.1rem; color:#334155; margin-bottom:15px; transition:0.2s;" onmouseover="this.style.background='#F8FAFC'" onmouseout="this.style.background='#FFF'">
+            <svg width="24" height="24" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+            Iniciar sesión con Google (Profesor)
         </button>
-
-        <!-- Botón sin cuenta -->
-        <button onclick="continueAsStudent()" style="width:100%; padding:16px 20px; border:1px solid rgba(255,255,255,0.1); border-radius:18px; background:rgba(16,185,129,0.15); cursor:pointer; font-family:'Nunito',sans-serif; font-weight:900; font-size:1rem; color:#6EE7B7; margin-bottom:10px; transition:all 0.2s; backdrop-filter:blur(10px);"
-            onmouseover="this.style.background='rgba(16,185,129,0.28)'; this.style.borderColor='rgba(16,185,129,0.4)'; this.style.transform='translateY(-2px)';"
-            onmouseout="this.style.background='rgba(16,185,129,0.15)'; this.style.borderColor='rgba(255,255,255,0.1)'; this.style.transform='translateY(0)';">
+        <button onclick="continueAsStudent()" style="width:100%; padding:14px; border:2px solid #E2E8F0; border-bottom-width:4px; border-radius:16px; background:#F8FAFC; cursor:pointer; font-family:'Nunito'; font-weight:900; font-size:1rem; color:#64748B; transition:0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'">
             🚀 Entrar sin cuenta (Elegir Modo)
         </button>
-
-        <p style="font-size:0.78rem; color:rgba(255,255,255,0.25); margin-top:16px; font-weight:700; letter-spacing:0.3px;">Solo el Profesor necesita cuenta de Google</p>
+        <p style="font-size:0.8rem; color:#CBD5E1; margin-top:20px; font-weight:800;">Solo el Profesor necesita cuenta de Google</p>
     </div>
 </div>
 
@@ -2065,17 +2041,8 @@ let currentUser = null;
 
 
 function loginWithGoogle() {
-    // No modificar DOM intensamente antes del popup
     const provider = new firebase.auth.GoogleAuthProvider();
-    auth.signInWithPopup(provider).catch(function(err) {
-        if (err.code !== 'auth/popup-closed-by-user') {
-            if (err.message.includes('popup') || err.message.includes('network') || err.code === 'auth/popup-blocked') {
-                alert('⚠️ El navegador bloqueó la ventana de Google.\n\nPor favor, PERMITE LAS VENTANAS EMERGENTES (pop-ups) para esta página ubicando el ícono en la barra de direcciones 👆. \n\nLuego vuelve a intentarlo.');
-            } else {
-                alert('Error al iniciar sesión: ' + err.message);
-            }
-        }
-    });
+    auth.signInWithPopup(provider).catch(err => alert('Error al iniciar sesión: ' + err.message));
 }
 
 
