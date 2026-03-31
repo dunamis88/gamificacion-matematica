@@ -1921,19 +1921,6 @@ if(localStorage.getItem('gamificacion_guide')) {
 
 
 // --- Configuración y Datos ---
-function toggleDarkMode() {
-    document.body.classList.toggle('dark-mode');
-    const isDark = document.body.classList.contains('dark-mode');
-    localStorage.setItem('aventura_dark_mode', isDark);
-    document.getElementById('btn-dark-mode').innerHTML = isDark ? svgSun : svgMoon;
-}
-
-if(localStorage.getItem('aventura_dark_mode') === 'true') {
-    document.body.classList.add('dark-mode');
-    document.getElementById('btn-dark-mode').innerHTML = svgSun;
-} else {
-    document.getElementById('btn-dark-mode').innerHTML = svgMoon;
-}
 
 function getLevelInfo(xp) {
     const level = Math.floor((-1 + Math.sqrt(1 + 8 * (Math.max(0, xp) / 25 + 1))) / 2);
