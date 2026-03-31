@@ -1654,6 +1654,16 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
                     <svg class="nb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
                     <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="onSearch(this.value)">
                 </div>
+
+                <!-- Undo / Redo -->
+                <div class="teacher-only" style="display:flex; align-items:center; gap:5px; margin-left:5px;">
+                    <button id="btn-undo" class="nb-icon-btn" onclick="undoPoints()" title="Deshacer (Ctrl+Z)" disabled style="opacity:0.4; width:34px; height:34px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v.5"/></svg>
+                    </button>
+                    <button id="btn-redo" class="nb-icon-btn" onclick="redoPoints()" title="Rehacer (Ctrl+Y)" disabled style="opacity:0.4; width:34px; height:34px;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5A5.5 5.5 0 0 0 4 14.5v.5"/></svg>
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -2124,7 +2134,10 @@ let notificationsHistory = [];
 let unreadNotifCount = 0;
 let lastProcessedEventId = null;
 let lastFirebaseEvent = null;
-let myLastEventId = null; // ID del último evento generado localmente
+let myLastEventId = null; 
+
+let undoStack = [];
+let redoStack = [];
 
 let badgesConfig = [
     { name: 'Participación', icon: '💡', points: 20 },
@@ -2862,12 +2875,21 @@ function renderSelectionBarActions() {
     actionContainer.innerHTML = html;
 }
 
-function addXPToSelected(amount, customHistoryMsg = null) {
-    if(amount <= 0) return;
+function addXPToSelected(amount, customHistoryMsg = null, isUndoRedo = false) {
+    if(amount === 0) return;
     if(selectedStudents.size === 0) {
-        alert('⚠️ Primero debes marcar al menos a un estudiante en la lista de asistencia.');
+        showToast("⚠️ Selecciona primero al menos a un estudiante.", "⚠️");
         return;
     }
+
+    // Registrar para Undo
+    if (!isUndoRedo) {
+        undoStack.push({ type: 'bulk', ids: Array.from(selectedStudents), amount, msg: customHistoryMsg });
+        if (undoStack.length > 30) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoButtons();
+    }
+
     let studentsAssigned = [];
     let leveledUpStudents = [];
     
@@ -2877,6 +2899,7 @@ function addXPToSelected(amount, customHistoryMsg = null) {
             prepareStudent(s);
             const oldLevelInfo = getLevelInfo(s.xp);
             s.xp += Math.floor(amount);
+            s.gold += Math.floor(amount); // CORRECCIÓN: Agregar oro siempre que se agregue XP
             s.sessionXP += Math.floor(amount);
             
             const msg = customHistoryMsg || `+${amount} XP masivo`;
@@ -2955,8 +2978,17 @@ function triggerRowAnimation(id) {
     }
 }
 
-function addXP(id, amount, customHistoryMsg = null) {
-    if(amount === 0) return; 
+function addXP(id, amount, customHistoryMsg = null, isUndoRedo = false) {
+    if(amount === 0) return;
+    
+    // Registrar para Undo
+    if (!isUndoRedo) {
+        undoStack.push({ type: 'single', id, amount, msg: customHistoryMsg });
+        if (undoStack.length > 30) undoStack.shift();
+        redoStack = [];
+        updateUndoRedoButtons();
+    }
+
     const s = courses[currentCourse].find(x => x.id === id);
     if(!s) return;
 
@@ -3044,6 +3076,67 @@ function addXP(id, amount, customHistoryMsg = null) {
         }, 1200);
     }
 }
+
+function updateUndoRedoButtons() {
+    const uBtn = document.getElementById('btn-undo');
+    const rBtn = document.getElementById('btn-redo');
+    if (!uBtn || !rBtn) return;
+    
+    uBtn.disabled = undoStack.length === 0;
+    uBtn.style.opacity = undoStack.length === 0 ? 0.4 : 1;
+    uBtn.style.cursor = undoStack.length === 0 ? 'default' : 'pointer';
+    
+    rBtn.disabled = redoStack.length === 0;
+    rBtn.style.opacity = redoStack.length === 0 ? 0.4 : 1;
+    rBtn.style.cursor = redoStack.length === 0 ? 'default' : 'pointer';
+}
+
+function undoPoints() {
+    if (undoStack.length === 0 || role !== 'teacher') return;
+    const action = undoStack.pop();
+    redoStack.push(action);
+    
+    if (action.type === 'single') {
+        addXP(action.id, -action.amount, `Deshacer: ${action.msg || 'Ajuste de puntos'}`, true);
+    } else {
+        const tempSelected = new Set(selectedStudents);
+        selectedStudents.clear();
+        action.ids.forEach(id => selectedStudents.add(id));
+        addXPToSelected(-action.amount, `Deshacer: ${action.msg || 'Ajuste masivo'}`, true);
+        selectedStudents.clear();
+        tempSelected.forEach(id => selectedStudents.add(id));
+    }
+    updateUndoRedoButtons();
+}
+
+function redoPoints() {
+    if (redoStack.length === 0 || role !== 'teacher') return;
+    const action = redoStack.pop();
+    undoStack.push(action);
+    
+    if (action.type === 'single') {
+        addXP(action.id, action.amount, action.msg, true);
+    } else {
+        const tempSelected = new Set(selectedStudents);
+        selectedStudents.clear();
+        action.ids.forEach(id => selectedStudents.add(id));
+        addXPToSelected(action.amount, action.msg, true);
+        selectedStudents.clear();
+        tempSelected.forEach(id => selectedStudents.add(id));
+    }
+    updateUndoRedoButtons();
+}
+
+// Atajos globales
+window.addEventListener('keydown', e => {
+    if (role !== 'teacher') return;
+    if (e.ctrlKey && e.key.toLowerCase() === 'z' && !e.shiftKey) {
+        e.preventDefault(); undoPoints();
+    }
+    if (e.ctrlKey && (e.key.toLowerCase() === 'y' || (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'z'))) {
+        e.preventDefault(); redoPoints();
+    }
+});
 
 function showLevelUp(name, level, isMultiple = false) {
     if(isLevelUpShowing) {
