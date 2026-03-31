@@ -289,6 +289,278 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 #selection-bar { background: #EFF6FF !important; border: 3px dashed #3B82F6 !important; padding: 12px 20px !important; border-radius: 20px !important; box-shadow: none !important; margin-bottom: 15px; flex-wrap: wrap; }
 #selection-bar span { color: #1E3A8A !important; font-size: 1.1rem !important; font-weight: 900 !important;}
 
+/* ===== PANTALLA DE CURSOS PREMIUM ===== */
+#view-courses {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+}
+
+.courses-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    overflow-y: auto;
+    padding: 40px 20px 60px;
+}
+
+/* Fondo animado para cursos */
+.courses-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 40%, #0f172a 100%);
+    overflow: hidden;
+}
+
+.courses-bg-orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    opacity: 0.35;
+    animation: orbFloat 8s ease-in-out infinite;
+}
+
+@keyframes orbFloat {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(30px, -20px) scale(1.05); }
+    66% { transform: translate(-20px, 15px) scale(0.95); }
+}
+
+.courses-content {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.courses-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.courses-icon {
+    font-size: 5rem;
+    margin-bottom: 12px;
+    filter: drop-shadow(0 8px 20px rgba(0,0,0,0.5));
+    animation: roleIconFloat 4s ease-in-out infinite;
+    display: block;
+}
+
+.courses-title {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: #fff;
+    text-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    margin: 0 0 8px 0;
+}
+
+.courses-subtitle {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.65);
+    margin: 0;
+}
+
+/* Panel Agregar Curso (Profesor) */
+.add-course-panel {
+    background: rgba(255,255,255,0.07);
+    border: 2px dashed rgba(255,255,255,0.25);
+    border-radius: 24px;
+    padding: 22px 28px;
+    margin-bottom: 36px;
+    width: 100%;
+    max-width: 560px;
+    backdrop-filter: blur(8px);
+    transition: 0.3s;
+}
+.add-course-panel:hover {
+    background: rgba(255,255,255,0.1);
+    border-color: rgba(255,255,255,0.4);
+}
+.add-course-panel h3 {
+    color: #FBBF24;
+    font-size: 1.1rem;
+    margin: 0 0 14px 0;
+    font-weight: 900;
+}
+.add-course-panel input {
+    background: rgba(255,255,255,0.12) !important;
+    border: 2px solid rgba(255,255,255,0.2) !important;
+    color: #fff !important;
+    border-radius: 14px !important;
+    padding: 12px 18px !important;
+    font-size: 1rem !important;
+    flex: 1;
+}
+.add-course-panel input::placeholder { color: rgba(255,255,255,0.45); }
+.add-course-panel input:focus { border-color: #FBBF24 !important; background: rgba(255,255,255,0.18) !important; }
+
+.add-course-btn {
+    background: linear-gradient(135deg, #FBBF24, #F59E0B) !important;
+    color: #1e3a8a !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 12px 22px !important;
+    font-size: 1rem !important;
+    font-weight: 900 !important;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.add-course-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(251,191,36,0.4) !important; filter: brightness(1.1); }
+
+/* Grid de tarjetas de curso */
+#course-buttons {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 24px;
+    width: 100%;
+}
+
+/* Tarjeta de curso premium */
+.course-card {
+    position: relative;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 28px;
+    padding: 36px 24px 28px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s, background 0.3s, border-color 0.3s;
+    backdrop-filter: blur(10px);
+    text-align: center;
+    overflow: hidden;
+    min-height: 200px;
+}
+.course-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 28px;
+    background: linear-gradient(135deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+    pointer-events: none;
+}
+.course-card:hover {
+    transform: translateY(-10px) scale(1.03);
+    background: rgba(255,255,255,0.14);
+    border-color: rgba(255,255,255,0.4);
+    box-shadow: 0 24px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.2) inset;
+}
+.course-card-icon {
+    font-size: 4rem;
+    margin-bottom: 14px;
+    animation: roleIconFloat 3.5s ease-in-out infinite;
+    display: block;
+    filter: drop-shadow(0 4px 12px rgba(0,0,0,0.4));
+}
+.course-card-name {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 6px;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    line-height: 1.1;
+}
+.course-card-count {
+    font-size: 1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.65);
+    margin-bottom: 18px;
+}
+.course-card-btn {
+    background: rgba(255,255,255,0.18);
+    border: 2px solid rgba(255,255,255,0.3);
+    border-radius: 50px;
+    color: #fff;
+    font-weight: 900;
+    font-size: 0.9rem;
+    padding: 8px 22px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: 'Nunito', sans-serif;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.course-card-btn:hover { background: rgba(255,255,255,0.3); transform: scale(1.05); }
+
+/* Colores por curso (rotativos) */
+.course-color-0 { border-color: rgba(251,191,36,0.5) !important; }
+.course-color-0:hover { box-shadow: 0 24px 60px rgba(251,191,36,0.3), 0 0 40px rgba(251,191,36,0.15) !important; }
+.course-color-0 .course-card-btn { background: rgba(251,191,36,0.25); border-color: rgba(251,191,36,0.5); }
+
+.course-color-1 { border-color: rgba(139,92,246,0.5) !important; }
+.course-color-1:hover { box-shadow: 0 24px 60px rgba(139,92,246,0.3), 0 0 40px rgba(139,92,246,0.15) !important; }
+.course-color-1 .course-card-btn { background: rgba(139,92,246,0.25); border-color: rgba(139,92,246,0.5); }
+
+.course-color-2 { border-color: rgba(16,185,129,0.5) !important; }
+.course-color-2:hover { box-shadow: 0 24px 60px rgba(16,185,129,0.3), 0 0 40px rgba(16,185,129,0.15) !important; }
+.course-color-2 .course-card-btn { background: rgba(16,185,129,0.25); border-color: rgba(16,185,129,0.5); }
+
+.course-color-3 { border-color: rgba(59,130,246,0.5) !important; }
+.course-color-3:hover { box-shadow: 0 24px 60px rgba(59,130,246,0.3), 0 0 40px rgba(59,130,246,0.15) !important; }
+.course-color-3 .course-card-btn { background: rgba(59,130,246,0.25); border-color: rgba(59,130,246,0.5); }
+
+.course-color-4 { border-color: rgba(244,114,182,0.5) !important; }
+.course-color-4:hover { box-shadow: 0 24px 60px rgba(244,114,182,0.3), 0 0 40px rgba(244,114,182,0.15) !important; }
+.course-color-4 .course-card-btn { background: rgba(244,114,182,0.25); border-color: rgba(244,114,182,0.5); }
+
+/* Botón de volver en cursos */
+.courses-back-btn {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    z-index: 200;
+    background: rgba(255,255,255,0.12);
+    border: 2px solid rgba(255,255,255,0.25);
+    border-radius: 50px;
+    color: #fff;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    padding: 10px 20px;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.courses-back-btn:hover { background: rgba(255,255,255,0.2); transform: translateX(-3px); }
+
+/* Etiqueta modo estudiante */
+.student-mode-badge {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 200;
+    background: rgba(16,185,129,0.25);
+    border: 2px solid rgba(16,185,129,0.4);
+    color: #6ee7b7;
+    font-weight: 900;
+    font-size: 0.9rem;
+    padding: 8px 18px;
+    border-radius: 50px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
 /* ===== PANTALLA DE SELECCIÓN DE ROL (DOS MITADES) ===== */
 #view-roles {
     background: transparent;
@@ -719,22 +991,49 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
     </div>
 </div>
 
-<!-- VISTA 2: Elegir Curso -->
+<!-- VISTA 2: Elegir Curso (PREMIUM) -->
 <div id="view-courses" class="view hidden">
-    <button class="close-btn" onclick="switchView('roles')" style="top: 15px; right: 15px; z-index: 10;" title="Volver al inicio">✖</button>
-    <h1 id="courses-view-title">Seleccionar Curso</h1>
-    <p id="courses-view-hint" style="text-align:center; color:var(--subText); font-weight:800; margin-bottom:10px;"></p>
-    
-    <!-- Sección Profesor: Agregar Curso -->
-    <div class="teacher-only" style="max-width: 500px; margin: 0 auto 30px; background: var(--rowBg); padding: 20px; border-radius: 20px; border: 2px dashed var(--purplePrimary);">
-        <h3 style="margin-top:0; color:var(--purplePrimary); font-size:1.2rem;">➕ Crear Nuevo Curso</h3>
-        <div style="display:flex; gap:10px;">
-            <input type="text" id="new-course-name" placeholder="Ej: 7° Básico A" style="flex:1; border:2px solid var(--btnShadow);" onkeydown="if(event.key==='Enter') addCourseFromMenu()">
-            <button class="btn-sm b20" onclick="addCourseFromMenu()" style="padding:10px 20px; font-size:1rem;">CREAR</button>
-        </div>
+    <!-- Fondo animado -->
+    <div class="courses-bg">
+        <div class="courses-bg-orb" style="width:600px;height:600px;background:#6d28d9;top:-150px;left:-150px;animation-delay:0s;"></div>
+        <div class="courses-bg-orb" style="width:500px;height:500px;background:#1d4ed8;bottom:-100px;right:-100px;animation-delay:3s;"></div>
+        <div class="courses-bg-orb" style="width:350px;height:350px;background:#065f46;top:40%;left:50%;animation-delay:5s;"></div>
     </div>
 
-    <div id="course-buttons" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; max-width: 1000px; margin: 0 auto; justify-content: center; padding: 10px;"></div>
+    <!-- Botón volver -->
+    <button class="courses-back-btn" onclick="switchView('roles')">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+        Cambiar Modo
+    </button>
+
+    <!-- Badge modo estudiante -->
+    <div id="student-mode-badge" class="student-mode-badge hidden">🎓 Modo Estudiante — Solo lectura</div>
+
+    <!-- Contenido principal -->
+    <div class="courses-fullscreen">
+        <div class="courses-content">
+
+            <!-- Header -->
+            <div class="courses-header">
+                <span class="courses-icon" id="courses-view-icon">📚</span>
+                <h1 class="courses-title" id="courses-view-title">Seleccionar Curso</h1>
+                <p class="courses-subtitle" id="courses-view-hint"></p>
+            </div>
+
+            <!-- Panel Agregar Curso (solo profesor) -->
+            <div id="add-course-panel" class="add-course-panel" style="display:none;">
+                <h3>✨ Crear Nuevo Curso</h3>
+                <div style="display:flex; gap:12px;">
+                    <input type="text" id="new-course-name" placeholder="Ej: 7° Básico A" onkeydown="if(event.key==='Enter') addCourseFromMenu()">
+                    <button class="add-course-btn" onclick="addCourseFromMenu()">+ CREAR</button>
+                </div>
+            </div>
+
+            <!-- Tarjetas de cursos -->
+            <div id="course-buttons"></div>
+
+        </div>
+    </div>
 </div>
 
 <!-- VISTA 3: Pizarra Principal -->
@@ -1227,12 +1526,8 @@ async function loadDataFromFirestore(uid) {
     } catch(e) {
         console.warn('Error cargando desde Firestore, usando localStorage:', e);
     }
-    // Ir a la app como profesor después de cargar
-    role = 'teacher';
-    document.body.setAttribute('data-role', 'teacher');
-    switchView('courses');
-    renderCourses();
-    updateMassXPText();
+    // Ir a la pantalla de selección de rol primero
+    switchView('roles');
 }
 
 async function saveData() {
@@ -1348,75 +1643,83 @@ function renderCourses() {
     const cb = document.getElementById('course-buttons');
     cb.innerHTML = '';
 
-    // Actualizar visibilidad del panel de crear curso según rol
-    const addCoursePanel = document.querySelector('#view-courses .teacher-only');
-    if (addCoursePanel) {
-        addCoursePanel.style.display = (role === 'teacher') ? '' : 'none';
-    }
+    // Iconos rotativos por curso
+    const courseIcons = ['\ud83d\udcd6','\ud83e\uddee','\ud83d\udd2c','\ud83c\udfa8','\ud83c\udf0d','\ud83e\uddea','\ud83d\udcd0','\ud83c\udfa4','\ud83c\udfeb','\ud83c\udf1f'];
+    const colorCount = 5;
 
-    // Título y hint según el rol
+    // Panel agregar curso
+    const addPanel = document.getElementById('add-course-panel');
+    if (addPanel) addPanel.style.display = (role === 'teacher') ? '' : 'none';
+
+    // Badge modo estudiante
+    const badge = document.getElementById('student-mode-badge');
+    if (badge) badge.classList.toggle('hidden', role !== 'student');
+
+    // Titulo e icono segun rol
     const coursesTitle = document.getElementById('courses-view-title');
-    if (coursesTitle) {
-        coursesTitle.textContent = role === 'student' ? '📚 Elige tu Curso' : '📚 Seleccionar Curso';
-    }
+    if (coursesTitle) coursesTitle.textContent = role === 'student' ? 'Elige tu Curso' : 'Seleccionar Curso';
+    const coursesIcon = document.getElementById('courses-view-icon');
+    if (coursesIcon) coursesIcon.textContent = role === 'student' ? '\ud83c\udf93' : '\ud83d\udcda';
+
     const coursesHint = document.getElementById('courses-view-hint');
     if (coursesHint) {
-        coursesHint.textContent = role === 'student' ? 'Solo lectura — Pizarra de Estudiantes' : '';
-        coursesHint.style.display = role === 'student' ? '' : 'none';
+        coursesHint.textContent = role === 'student' ? 'Selecciona tu aula para ver el ranking' : 'Selecciona un curso para abrir la pizarra';
     }
 
-    Object.keys(courses).forEach(c => {
-        const container = document.createElement('div');
-        container.style.position = 'relative';
-        container.style.width = '100%';
-        container.style.maxWidth = '300px';
-        container.style.margin = '0 auto';
-        container.style.display = 'flex';
-        container.style.flexDirection = 'column';
+    const courseKeys = Object.keys(courses);
+    if (courseKeys.length === 0) {
+        cb.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.5);font-size:1.2rem;font-weight:800;padding:40px 20px;">
+            <div style="font-size:4rem;margin-bottom:16px;">\ud83d\udced</div>
+            No hay cursos a\u00fan.<br>\u00a1Crea el primero arriba!
+        </div>`;
+        return;
+    }
 
-        const b = document.createElement('button');
-        b.className = 'btn-large';
-        b.style.margin = '0';
-        b.style.width = '100%';
-        b.style.padding = '20px 10px';
-        b.innerText = c + " (" + courses[c].length + " est.)";
-        b.onclick = () => { 
-            currentCourse = c; 
+    courseKeys.forEach((c, idx) => {
+        const colorIdx = idx % colorCount;
+        const icon = courseIcons[idx % courseIcons.length];
+        const count = courses[c].length;
+
+        const card = document.createElement('div');
+        card.className = `course-card course-color-${colorIdx}`;
+        card.style.animation = `slideUpFade 0.4s ease-out ${idx * 0.08}s both`;
+
+        card.innerHTML = `
+            <span class="course-card-icon" style="animation-delay:${idx * 0.3}s">${icon}</span>
+            <div class="course-card-name">${c}</div>
+            <div class="course-card-count">${count} estudiante${count !== 1 ? 's' : ''}</div>
+            <button class="course-card-btn">\u25b6 ENTRAR</button>
+        `;
+
+        card.onclick = () => {
+            currentCourse = c;
             selectedStudents.clear();
             searchTerm = '';
             const searchInput = document.getElementById('search-input');
-            if(searchInput) searchInput.value = '';
-            initDash(); 
+            if (searchInput) searchInput.value = '';
+            initDash();
         };
-        
-        container.appendChild(b);
 
-        // Solo el profesor puede eliminar cursos
         if (role === 'teacher') {
             const delBtn = document.createElement('button');
-            delBtn.innerHTML = '✖';
-            delBtn.className = 'close-btn';
-            delBtn.style.top = '-8px';
-            delBtn.style.right = '-8px';
-            delBtn.style.width = '32px';
-            delBtn.style.height = '32px';
-            delBtn.style.fontSize = '1.1rem';
-            delBtn.style.borderWidth = '3px';
-            delBtn.style.zIndex = '5';
-            delBtn.title = 'Eliminar curso entero';
+            delBtn.innerHTML = '\u2716';
+            delBtn.title = 'Eliminar curso';
+            delBtn.style.cssText = `position:absolute;top:12px;right:12px;background:rgba(239,68,68,0.25);border:2px solid rgba(239,68,68,0.4);color:#fca5a5;border-radius:50%;width:32px;height:32px;font-size:0.85rem;cursor:pointer;font-weight:900;display:flex;align-items:center;justify-content:center;transition:0.2s;backdrop-filter:blur(4px);padding:0;font-family:'Nunito',sans-serif;`;
+            delBtn.onmouseover = () => { delBtn.style.background = 'rgba(239,68,68,0.5)'; delBtn.style.color = '#fff'; };
+            delBtn.onmouseout = () => { delBtn.style.background = 'rgba(239,68,68,0.25)'; delBtn.style.color = '#fca5a5'; };
             delBtn.onclick = (e) => {
                 e.stopPropagation();
-                if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso.`)) { 
-                    delete courses[c]; 
-                    if(currentCourse === c) currentCourse = null; 
-                    saveData(); 
-                    renderCourses(); 
+                if (confirm(`\u26a0\ufe0f \u00bfELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acci\u00f3n es irreversible.`)) {
+                    delete courses[c];
+                    if (currentCourse === c) currentCourse = null;
+                    saveData();
+                    renderCourses();
                 }
             };
-            container.appendChild(delBtn);
+            card.appendChild(delBtn);
         }
 
-        cb.appendChild(container);
+        cb.appendChild(card);
     });
 }
 
