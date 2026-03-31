@@ -1827,7 +1827,10 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
     <!-- Top Bar -->
     <div style="background:linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%); padding:20px 30px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); flex-shrink:0;">
         <h2 style="margin:0; font-size:1.8rem; text-shadow:0 2px 8px rgba(0,0,0,0.4);">⚙️ Configuración del Profesor</h2>
-        <button onclick="switchConfigToDash()" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.4)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'" title="Volver a la Pizarra">✖</button>
+        <div style="display:flex; gap: 15px; align-items: center;">
+            <button id="btn-config-save" onclick="saveConfigGlobal()" style="display:none; background:#10B981; color:#fff; padding:10px 20px; border-radius:12px; border:none; font-weight:900; cursor:pointer; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(16,185,129,0.4);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg> Guardar Cambios</button>
+            <button onclick="switchConfigToDash()" style="background:rgba(239,68,68,0.2); border:1px solid rgba(239,68,68,0.4); color:#fff; width:40px; height:40px; border-radius:50%; font-size:1.2rem; cursor:pointer; display:flex; align-items:center; justify-content:center; transition:0.2s;" onmouseover="this.style.background='rgba(239,68,68,0.4)'" onmouseout="this.style.background='rgba(239,68,68,0.2)'" title="Volver a la Pizarra">✖</button>
+        </div>
     </div>
 
     <!-- Layout Dividido -->
@@ -2325,6 +2328,10 @@ async function loadDataFromFirestore(uid) {
 async function saveData() {
     // Guardar siempre en localStorage (rápido y offline)
     localStorage.setItem('gamificacion_cursos', JSON.stringify(courses));
+    localStorage.setItem('gamificacion_points', JSON.stringify(pointValues));
+    localStorage.setItem('gamificacion_shop', JSON.stringify(shopItems));
+    localStorage.setItem('gamificacion_guide', JSON.stringify(rewardSources));
+
     // Si hay usuario logueado, guardar también en Firestore
     if (currentUser) {
         try {
@@ -3206,8 +3213,56 @@ window.addEventListener('load', () => {
 });
 
 
+let hasUnsavedConfigChanges = false;
+let configBackup = null;
+
+function markConfigChanged() {
+    hasUnsavedConfigChanges = true;
+    const btn = document.getElementById('btn-config-save');
+    if (btn) btn.style.display = 'flex';
+}
+
+function saveConfigGlobal() {
+    cfgSavePoints();
+    saveData();
+    hasUnsavedConfigChanges = false;
+    const btn = document.getElementById('btn-config-save');
+    if (btn) btn.style.display = 'none';
+    
+    configBackup = {
+        courses: JSON.stringify(courses),
+        pointValues: JSON.stringify(pointValues),
+        shopItems: JSON.stringify(shopItems),
+        rewardSources: JSON.stringify(rewardSources)
+    };
+    alert('✅ Cambios guardados correctamente para todos los cursos.');
+}
+
+function discardConfigChanges() {
+    if (configBackup) {
+        courses = JSON.parse(configBackup.courses);
+        pointValues = JSON.parse(configBackup.pointValues);
+        shopItems = JSON.parse(configBackup.shopItems);
+        rewardSources = JSON.parse(configBackup.rewardSources);
+    }
+    hasUnsavedConfigChanges = false;
+    const btn = document.getElementById('btn-config-save');
+    if (btn) btn.style.display = 'none';
+    updateMassXPText();
+}
+
 // --- Configuración ---
 function openConfig() {
+    configBackup = {
+        courses: JSON.stringify(courses),
+        pointValues: JSON.stringify(pointValues),
+        shopItems: JSON.stringify(shopItems),
+        rewardSources: JSON.stringify(rewardSources)
+    };
+    hasUnsavedConfigChanges = false;
+    const btn = document.getElementById('btn-config-save');
+    if (btn) btn.style.display = 'none';
+
     switchView('config');
     cfgRenderCourses();
     cfgRenderPoints();
@@ -3219,6 +3274,13 @@ function openConfig() {
 }
 
 function switchConfigToDash() {
+    if (hasUnsavedConfigChanges) {
+        if (confirm("Tienes cambios sin guardar en la configuración.\n\nAceptar: Guardar los cambios\nCancelar: Descartar los cambios y salir")) {
+            saveConfigGlobal();
+        } else {
+            discardConfigChanges();
+        }
+    }
     initDash();
 }
 
@@ -3244,13 +3306,13 @@ function cfgRenderCourses() {
 
 function cfgAddCourse() {
     const c = document.getElementById('cfg-new-course').value.trim();
-    if(c && !courses[c]) { courses[c] = []; saveData(); cfgRenderCourses(); document.getElementById('cfg-new-course').value = ''; }
+    if(c && !courses[c]) { courses[c] = []; markConfigChanged(); cfgRenderCourses(); document.getElementById('cfg-new-course').value = ''; }
 }
 function cfgDelCourse(c) {
     if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso. ¿Deseas continuar?`)) { 
         delete courses[c]; 
         if(currentCourse === c) currentCourse = null; 
-        saveData(); 
+        markConfigChanged(); 
         cfgRenderCourses(); 
     }
 }
@@ -3265,8 +3327,8 @@ function cfgSavePoints() {
     pointValues[0] = parseInt(document.getElementById('cfg-pt-1').value)||5;
     pointValues[1] = parseInt(document.getElementById('cfg-pt-2').value)||10;
     pointValues[2] = parseInt(document.getElementById('cfg-pt-3').value)||30;
-    localStorage.setItem('gamificacion_points', JSON.stringify(pointValues));
     updateMassXPText();
+    markConfigChanged();
 }
 
 function cfgRenderStudents() {
@@ -3291,13 +3353,13 @@ function cfgRenameStudent(c, id, newName) {
     if(newName.trim()) {
         const s = courses[c].find(x => x.id === id);
         if(s) s.name = newName.trim();
-        saveData();
+        markConfigChanged();
     }
 }
 function cfgDelStudent(c, id) {
     if(confirm('¿Eliminar estudiante?')) {
         courses[c] = courses[c].filter(x => x.id !== id);
-        saveData(); cfgRenderStudents(); cfgRenderCourses();
+        markConfigChanged(); cfgRenderStudents(); cfgRenderCourses();
     }
 }
 function cfgAddStudentsLot() {
@@ -3308,7 +3370,7 @@ function cfgAddStudentsLot() {
     if(parts.length) {
         let maxId = courses[c].length > 0 ? Math.max(...courses[c].map(s => s.id)) : 0;
         parts.forEach(name => courses[c].push({ id: ++maxId, name: name, xp: 0, aliado: false }));
-        saveData(); cfgRenderStudents(); cfgRenderCourses();
+        markConfigChanged(); cfgRenderStudents(); cfgRenderCourses();
         document.getElementById('cfg-new-students').value = '';
     }
 }
@@ -3331,18 +3393,17 @@ function cfgRenderShop() {
 }
 function cfgAddShopItem() {
     shopItems.push({ name: 'Nueva Recompensa', cost: 100, icon: '🌟' });
-    cfgSaveShop(); cfgRenderShop();
+    markConfigChanged(); cfgRenderShop();
 }
 function cfgDelShop(i) {
     if(confirm("¿Eliminar recompensa de la tienda?")) {
-        shopItems.splice(i, 1); cfgSaveShop(); cfgRenderShop();
+        shopItems.splice(i, 1); markConfigChanged(); cfgRenderShop();
     }
 }
 function cfgUpdateShop(i, field, val) {
     shopItems[i][field] = field === 'cost' ? (parseInt(val)||0) : val;
-    cfgSaveShop();
+    markConfigChanged();
 }
-function cfgSaveShop() { localStorage.setItem('gamificacion_shop', JSON.stringify(shopItems)); }
 
 function cfgOpenIconPicker(idx) {
     cfgShopEditingIndex = idx;
@@ -3351,11 +3412,11 @@ function cfgOpenIconPicker(idx) {
 function cfgSelectIcon(ic) {
     if(cfgShopEditingIndex !== null) {
         shopItems[cfgShopEditingIndex].icon = ic;
-        cfgSaveShop(); cfgRenderShop();
+        markConfigChanged(); cfgRenderShop();
         hideModal('modal-icon-picker');
     } else if(cfgGuideEditingIndex !== null) {
         rewardSources[cfgGuideEditingIndex].icon = ic;
-        cfgSaveGuide(); cfgRenderGuide();
+        markConfigChanged(); cfgRenderGuide();
         hideModal('modal-icon-picker');
     }
 }
@@ -3388,18 +3449,17 @@ function cfgRenderGuide() {
 }
 function cfgAddGuideItem() {
     rewardSources.push({ title: 'Nueva Regla', desc: 'Explica cómo ganar esta XP...', points: 10, icon: '🚀' });
-    cfgSaveGuide(); cfgRenderGuide();
+    markConfigChanged(); cfgRenderGuide();
 }
 function cfgDelGuide(i) {
     if(confirm("¿Eliminar esta regla del manual?")) {
-        rewardSources.splice(i, 1); cfgSaveGuide(); cfgRenderGuide();
+        rewardSources.splice(i, 1); markConfigChanged(); cfgRenderGuide();
     }
 }
 function cfgUpdateGuide(i, field, val) {
     rewardSources[i][field] = field === 'points' ? (parseInt(val)||0) : val;
-    cfgSaveGuide();
+    markConfigChanged();
 }
-function cfgSaveGuide() { localStorage.setItem('gamificacion_guide', JSON.stringify(rewardSources)); }
 function cfgOpenGuideIconPicker(idx) {
     cfgGuideEditingIndex = idx;
     cfgShopEditingIndex = null;
