@@ -2067,23 +2067,26 @@ let currentUser = null;
 function loginWithGoogle() {
     const btn = document.getElementById('btn-google-login');
     const txt = document.getElementById('google-btn-text');
-    // Mostrar estado de carga
-    if (btn) { btn.style.opacity = '0.65'; btn.disabled = true; }
-    if (txt) txt.textContent = 'Abriendo Google...';
-    // Auto-reset after 10s in case popup is blocked silently
-    const resetBtn = function() {
-        if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
-        if (txt) txt.textContent = 'Iniciar sesión con Google';
-    };
-    const resetTimer = setTimeout(resetBtn, 10000);
+    
+    // Feedback visual opcional
+    if (btn) { btn.style.opacity = '0.7'; btn.disabled = true; }
+    if (txt) txt.textContent = 'Abriendo ventana...';
+
+    // Crear proveedor y llamar a Firebase
     const provider = new firebase.auth.GoogleAuthProvider();
     auth.signInWithPopup(provider)
-        .then(function() { clearTimeout(resetTimer); })
+        .then(function() {
+            // Éxito: el onAuthStateChanged se encargará del resto
+            if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
+            if (txt) txt.textContent = 'Iniciar sesión con Google';
+        })
         .catch(function(err) {
-            clearTimeout(resetTimer);
-            resetBtn();
+            // Restaurar botón en caso de cerrar ventana
+            if (btn) { btn.style.opacity = '1'; btn.disabled = false; }
+            if (txt) txt.textContent = 'Iniciar sesión con Google';
+            
             if (err.code !== 'auth/popup-closed-by-user') {
-                alert('Error: ' + err.message);
+                alert('Error al iniciar sesión: ' + err.message);
             }
         });
 }
