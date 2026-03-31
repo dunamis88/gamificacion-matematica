@@ -2118,6 +2118,7 @@ const libIcons = [
 ];
 let cfgShopEditingIndex = null;
 let cfgGuideEditingIndex = null;
+let cfgCourseEditingKey = null;
 
 if(localStorage.getItem('gamificacion_points')) {
     try { pointValues = JSON.parse(localStorage.getItem('gamificacion_points')); } catch(e){}
@@ -2226,6 +2227,11 @@ let courses = {
 const localData = localStorage.getItem('gamificacion_cursos');
 if(localData) {
     try { courses = JSON.parse(localData); } catch(e){}
+}
+let courseIcons = {};
+const localIcons = localStorage.getItem('gamificacion_course_icons');
+if(localIcons) {
+    try { courseIcons = JSON.parse(localIcons); } catch(e){}
 }
 
 // =============================================
@@ -2336,6 +2342,7 @@ async function loadDataFromFirestore(uid) {
         if (snap.exists) {
             const data = snap.data();
             if (data.courses) courses = data.courses;
+            if (data.courseIcons) courseIcons = data.courseIcons;
             if (data.shop) shopItems = data.shop;
             if (data.guide) rewardSources = data.guide;
             if (data.points) pointValues = data.points;
@@ -2350,6 +2357,7 @@ async function loadDataFromFirestore(uid) {
 async function saveData() {
     // Guardar siempre en localStorage (rápido y offline)
     localStorage.setItem('gamificacion_cursos', JSON.stringify(courses));
+    localStorage.setItem('gamificacion_course_icons', JSON.stringify(courseIcons));
     localStorage.setItem('gamificacion_points', JSON.stringify(pointValues));
     localStorage.setItem('gamificacion_shop', JSON.stringify(shopItems));
     localStorage.setItem('gamificacion_guide', JSON.stringify(rewardSources));
@@ -2359,6 +2367,7 @@ async function saveData() {
         try {
             await db.collection('teachers').doc(currentUser.uid).set({
                 courses: courses,
+                courseIcons: courseIcons,
                 shop: shopItems,
                 guide: rewardSources,
                 points: pointValues,
@@ -2498,9 +2507,11 @@ function renderCourses() {
         return;
     }
 
+    const courseIconsFallback = ['📚','🧮','🎒','🏆','⭐','🚀','⚡','🧩','🎨','🪐','🎲'];
+
     courseKeys.forEach((c, idx) => {
         const colorIdx = idx % colorCount;
-        const icon = courseIcons[idx % courseIcons.length];
+        const icon = courseIcons[c] || courseIconsFallback[idx % courseIconsFallback.length];
         const count = courses[c].length;
 
         const card = document.createElement('div');
@@ -3306,6 +3317,7 @@ function saveConfigGlobal() {
     
     configBackup = {
         courses: JSON.stringify(courses),
+        courseIcons: JSON.stringify(courseIcons),
         pointValues: JSON.stringify(pointValues),
         shopItems: JSON.stringify(shopItems),
         rewardSources: JSON.stringify(rewardSources)
@@ -3316,6 +3328,7 @@ function saveConfigGlobal() {
 function discardConfigChanges() {
     if (configBackup) {
         courses = JSON.parse(configBackup.courses);
+        courseIcons = JSON.parse(configBackup.courseIcons);
         pointValues = JSON.parse(configBackup.pointValues);
         shopItems = JSON.parse(configBackup.shopItems);
         rewardSources = JSON.parse(configBackup.rewardSources);
@@ -3330,6 +3343,7 @@ function discardConfigChanges() {
 function openConfig() {
     configBackup = {
         courses: JSON.stringify(courses),
+        courseIcons: JSON.stringify(courseIcons),
         pointValues: JSON.stringify(pointValues),
         shopItems: JSON.stringify(shopItems),
         rewardSources: JSON.stringify(rewardSources)
@@ -3363,7 +3377,10 @@ function cfgRenderCourses() {
     const list = document.getElementById('cfg-course-list');
     list.innerHTML = Object.keys(courses).map(c => `
         <li style="display:flex; justify-content:space-between; padding:12px 15px; border-bottom:1px solid var(--topBarBorder); align-items:center;">
-            <span style="font-weight:900; font-size:1.1rem; color:var(--text);">${c} <small style="color:var(--subText); font-size:0.9rem; font-weight:800; opacity:0.8;">(${courses[c].length} est.)</small></span>
+            <div style="display:flex; align-items:center; gap:12px;">
+                <button style="font-size:1.8rem; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:12px; width:45px; height:45px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex-shrink:0;" title="Cambiar Icono" onclick="cfgOpenCourseIconPicker('${c}')">${courseIcons[c] || '🧮'}</button>
+                <span style="font-weight:900; font-size:1.1rem; color:var(--text);">${c} <small style="color:var(--subText); font-size:0.9rem; font-weight:800; opacity:0.8;">(${courses[c].length} est.)</small></span>
+            </div>
             <button class="btn-sm" style="background:#EF4444; color:white; padding:6px 12px;" onclick="cfgDelCourse('${c}')">Borrar</button>
         </li>
     `).join('');
@@ -3386,6 +3403,7 @@ function cfgAddCourse() {
 function cfgDelCourse(c) {
     if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso. ¿Deseas continuar?`)) { 
         delete courses[c]; 
+        delete courseIcons[c];
         if(currentCourse === c) currentCourse = null; 
         markConfigChanged(); 
         cfgRenderCourses(); 
@@ -3480,10 +3498,20 @@ function cfgUpdateShop(i, field, val) {
     markConfigChanged();
 }
 
-function cfgOpenIconPicker(idx) {
-    cfgShopEditingIndex = idx;
+function cfgOpenCourseIconPicker(cKey) {
+    cfgCourseEditingKey = cKey;
+    cfgShopEditingIndex = null;
+    cfgGuideEditingIndex = null;
     showModal('modal-icon-picker');
 }
+
+function cfgOpenIconPicker(idx) {
+    cfgShopEditingIndex = idx;
+    cfgGuideEditingIndex = null;
+    cfgCourseEditingKey = null;
+    showModal('modal-icon-picker');
+}
+
 function cfgSelectIcon(ic) {
     if(cfgShopEditingIndex !== null) {
         shopItems[cfgShopEditingIndex].icon = ic;
@@ -3492,6 +3520,10 @@ function cfgSelectIcon(ic) {
     } else if(cfgGuideEditingIndex !== null) {
         rewardSources[cfgGuideEditingIndex].icon = ic;
         markConfigChanged(); cfgRenderGuide();
+        hideModal('modal-icon-picker');
+    } else if(cfgCourseEditingKey !== null) {
+        courseIcons[cfgCourseEditingKey] = ic;
+        markConfigChanged(); cfgRenderCourses();
         hideModal('modal-icon-picker');
     }
 }
@@ -3546,6 +3578,7 @@ function cfgUpdateGuide(i, field, val) {
 function cfgOpenGuideIconPicker(idx) {
     cfgGuideEditingIndex = idx;
     cfgShopEditingIndex = null;
+    cfgCourseEditingKey = null;
     showModal('modal-icon-picker');
 }
 
@@ -3553,6 +3586,7 @@ function cfgOpenGuideIconPicker(idx) {
 function exportData() {
     const data = {
         courses: courses,
+        courseIcons: courseIcons,
         shop: shopItems,
         guide: rewardSources,
         points: pointValues,
@@ -3578,6 +3612,7 @@ function importData(event) {
             const data = JSON.parse(e.target.result);
             if(confirm("⚠️ ¿Estás seguro de que quieres CARGAR esta copia? Se borrarán todos los datos actuales y se reemplazarán por los del archivo.")) {
                 if(data.courses) localStorage.setItem('gamificacion_cursos', JSON.stringify(data.courses));
+                if(data.courseIcons) localStorage.setItem('gamificacion_course_icons', JSON.stringify(data.courseIcons));
                 if(data.shop) localStorage.setItem('gamificacion_shop', JSON.stringify(data.shop));
                 if(data.guide) localStorage.setItem('gamificacion_guide', JSON.stringify(data.guide));
                 if(data.points) localStorage.setItem('gamificacion_points', JSON.stringify(data.points));
