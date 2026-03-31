@@ -2012,29 +2012,6 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 /* --- ANIMACIONES Y ESTILOS PREMIUM PARA MODALES --- */
 .modal-overlay { backdrop-filter: blur(8px); background: rgba(0,0,0,0.6) !important; }
 
-/* GUÍA (Reglas de Puntos) */
-#guide-content > div {
-    background: rgba(255,255,255,0.05) !important;
-    border: 1px solid rgba(139,92,246,0.3) !important;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
-    backdrop-filter: blur(12px) !important;
-    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) !important;
-    position: relative; overflow: hidden;
-}
-#guide-content > div::before {
-    content: ''; position: absolute; inset: 0; background: radial-gradient(circle at top, rgba(139,92,246,0.2), transparent 70%); opacity: 0; transition: 0.4s;
-}
-/* Removido zoom redundante que causaba doble escalado en la guía */
-#guide-content > .guide-section-container:hover {
-    filter: none;
-}
-#guide-content > div > div { color: #fff !important; position:relative; z-index:1; }
-#guide-content > div > div:last-child {
-    background: linear-gradient(135deg, #ec4899, #8b5cf6) !important;
-    box-shadow: 0 4px 15px rgba(236,72,153,0.4) !important;
-    border: none !important; letter-spacing: 1px;
-}
-
 /* TIENDA (Shop) */
 #shop-content > div[style*="background:var(--bg)"] {
     background: rgba(0,0,0,0.3) !important;
@@ -2062,12 +2039,14 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
     content:''; position:absolute; bottom:0; left:0; width:100%; height:3px; background:linear-gradient(90deg, transparent, #FBBF24, transparent); opacity:0; transition:0.3s;
 }
 #shop-grid > div:hover {
-    background: rgba(255,255,255,0.08) !important;
-    border-color: rgba(251,191,36,0.5) !important;
-    transform: translateY(-8px) scale(1.03) !important;
-    box-shadow: 0 20px 40px rgba(245,158,11,0.25) !important;
+    background: linear-gradient(135deg, #f472b6, #8b5cf6) !important;
+    border-color: rgba(255,255,255,0.4) !important;
+    transform: translateY(-10px) scale(1.05) !important;
+    box-shadow: 0 20px 40px rgba(236, 72, 153, 0.4), 0 0 20px rgba(139, 92, 246, 0.4) !important;
 }
-#shop-grid > div:hover::after { opacity: 1; }
+#shop-grid > div:hover::after { opacity: 1; background: #fff !important; }
+#shop-grid > div:hover > div { color: #fff !important; }
+#shop-grid > div:hover button:not(:disabled) { background: #fff !important; color: #8b5cf6 !important; }
 #shop-grid > div > div { color: #fff !important; }
 #shop-grid > div > div > strong { color: #FCD34D !important; text-shadow: 0 0 10px rgba(251,191,36,0.3) !important; font-size: 1.1rem !important; }
 
@@ -3411,15 +3390,21 @@ function showGuide() {
     <style>
         .guide-item-card { 
             position: relative;
-            overflow: hidden;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
             background: rgba(255,255,255,0.03);
             border: 1px solid rgba(255,255,255,0.08);
             backdrop-filter: blur(10px);
             -webkit-tap-highlight-color: transparent;
+            border-radius: 24px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
         .guide-item-card:hover { 
-            transform: translateY(-10px) scale(1.03); 
+            transform: translateY(-10px) scale(1.05); 
             background: linear-gradient(135deg, #f472b6, #8b5cf6) !important;
             border-color: rgba(255,255,255,0.4) !important;
             box-shadow: 0 20px 40px rgba(236, 72, 153, 0.4), 0 0 20px rgba(139, 92, 246, 0.4) !important; 
@@ -3429,6 +3414,8 @@ function showGuide() {
         .guide-item-card:hover .card-icon-pop { transform: scale(1.1) rotate(5deg); filter: drop-shadow(0 0 15px rgba(255,255,255,0.5)); }
         .guide-item-card:hover h4, .guide-item-card:hover p, .guide-item-card:hover div { color: #fff !important; }
         .guide-item-card:hover .xp-badge { background: #fff !important; color: #8b5cf6 !important; box-shadow: 0 4px 15px rgba(0,0,0,0.2); }
+        .shop-item-card:hover .card-icon-pop { transform: scale(1.1); }
+        .shop-item-card:hover div { color: #fff !important; }
         /* Sistema de Toasts/Notificaciones */
         #toast-container {
             position: fixed;
@@ -3486,7 +3473,8 @@ function showGuide() {
             }
             
             return `
-            <div class="guide-item-card" ${action} title="${info}" style="border-radius:24px; padding:18px; display:flex; flex-direction:column; align-items:center; text-align:center; box-shadow:0 10px 20px rgba(0,0,0,0.15); cursor:${cursor};">
+            return `
+            <div class="guide-item-card" ${action} title="${info}" style="cursor:${cursor};">
                 <div style="font-size:3.5rem; margin-bottom:12px; z-index:1; transition:transform 0.4s;" class="card-icon-pop">${s.icon}</div>
                 <div style="font-weight:900; font-size:1.15rem; color:#fff; margin-bottom:6px; line-height:1.2; z-index:1;">${s.title}</div>
                 <div style="font-size:0.85rem; color:rgba(255,255,255,0.65); margin-bottom:15px; flex:1; z-index:1;">${s.desc}</div>
@@ -3498,7 +3486,7 @@ function showGuide() {
 
     if(individual.length > 0) {
         html += `<h3 style="color:#A78BFA; text-align:left; border-bottom:1px solid rgba(167,139,250,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.3rem; display:flex; align-items:center; gap:8px;"><span>🧑</span> Individuales / Variables</h3>
-        <div class="guide-section-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:15px; margin-bottom: 30px;">
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:15px; margin-bottom: 30px;">
             ${renderCards(individual, false)}
         </div>`;
     }
@@ -3506,7 +3494,7 @@ function showGuide() {
     html += `<h3 style="color:#FBBF24; text-align:left; border-bottom:1px solid rgba(251,191,36,0.3); padding-bottom:8px; margin-bottom:15px; font-size:1.3rem; display:flex; align-items:center; gap:8px;"><span>👥</span> Grupales (Aplica a seleccionados)</h3>`;
     
     if(group.length > 0) {
-        html += `<div class="guide-section-container" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:15px;">
+        html += `<div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap:15px;">
             ${renderCards(group, true)}
         </div>`;
     }
