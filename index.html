@@ -692,20 +692,35 @@ body.dark-mode .b50 { background: rgba(139, 92, 246, 0.15) !important; border-co
 /* Modals Modernos Planos */
 .modal-overlay { 
   position: fixed; top:0; left:0; width:100%; height:100%; 
-  background: rgba(0, 0, 0, 0.7); display: flex; align-items: center; 
+  background: rgba(0, 0, 0, 0.75); display: flex; align-items: center; 
   justify-content: center; z-index: 1000; padding:15px;
+  backdrop-filter: blur(10px);
+  animation: fadeIn 0.2s ease;
 }
 .modal-gen-content, .modal-content { 
-  background: var(--modalBg) !important; border-radius: 20px !important; width: 100%; position: relative;
-  box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important; color: var(--text); overflow: hidden;
-  border: none !important; padding: 0 0 20px 0 !important;
+  background: #0f172a !important; border-radius: 24px !important; width: 100%; position: relative;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.7) !important; color: #fff !important; overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.1) !important; padding: 0 !important;
+  animation: scaleIn 0.3s cubic-bezier(0.34,1.2,0.64,1);
+  max-height: 90vh; display: flex; flex-direction: column;
 }
 
+/* Header de modal: gradiente oscuro animated */
 .modal-gen-content > h2:first-of-type, .modal-content > h2:first-of-type, .modal-content > h3:first-of-type, #view-config h2 { 
-    background: var(--purplePrimary) !important; padding: 20px !important; margin: 0 0 20px 0 !important; color: #FFF !important; border-bottom: none !important;
-    text-shadow: none !important; font-size: 1.8rem !important; border-radius: 20px 20px 0 0; text-align:center !important;
+    background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #1e1b4b 100%) !important;
+    padding: 22px 28px !important; margin: 0 !important; color: #fff !important;
+    border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.4) !important; font-size: 1.6rem !important;
+    border-radius: 24px 24px 0 0 !important; text-align:center !important; flex-shrink: 0;
+    position: relative;
 }
-.modal-gen-content > *, .modal-content > * { padding-left: 20px; padding-right: 20px; }
+.modal-gen-content > h2:first-of-type::after, .modal-content > h2:first-of-type::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, #6d28d9, #2563eb, #059669, #FBBF24, #6d28d9);
+    background-size: 300% 100%; animation: navbarGlow 6s linear infinite;
+}
+.modal-gen-content > *, .modal-content > * { padding-left: 24px; padding-right: 24px; }
+.modal-gen-content > div, .modal-content > div { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255,255,255,0.15) transparent; }
 
 #view-config { padding: 0 !important; overflow: hidden; border: none; }
 #view-config > .top-bar { background: var(--purplePrimary); padding: 20px; margin: 0 0 20px 0; border-bottom: none; border-radius: 20px 20px 0 0; flex-direction:column; gap:10px; align-items:center; }
@@ -714,16 +729,24 @@ body.dark-mode .b50 { background: rgba(139, 92, 246, 0.15) !important; border-co
 #view-config > div:last-child { padding-bottom: 20px; }
 #view-config h3 { color: var(--purplePrimary); text-transform: uppercase; font-size: 1.1rem; border-bottom: 2px solid var(--btnBg);}
 
-.close-btn { position: absolute; right: 10px; top: 10px; background: var(--pinkClose) !important; border: 4px solid #FFF !important; width: 40px; height: 40px; border-radius: 12px !important; font-size: 1.5rem !important; cursor: pointer; color: #FFF; font-weight: 900; box-shadow: none !important; display: flex; align-items: center; justify-content: center; padding: 0 !important; margin:0 !important; transition: 0.15s; line-height: 1;}
-.close-btn:hover { opacity: 0.9; transform: scale(1.05); }
+/* Close button premium */
+.close-btn {
+    position: absolute !important; right: 14px !important; top: 14px !important;
+    background: rgba(239,68,68,0.2) !important; border: 1px solid rgba(239,68,68,0.35) !important;
+    width: 36px !important; height: 36px !important; border-radius: 10px !important;
+    font-size: 1rem !important; cursor: pointer; color: #FCA5A5 !important; font-weight: 900;
+    box-shadow: none !important; display: flex; align-items: center; justify-content: center;
+    padding: 0 !important; margin: 0 !important; transition: 0.2s; line-height: 1; z-index: 10;
+}
+.close-btn:hover { background: rgba(239,68,68,0.45) !important; color: #fff !important; transform: scale(1.05); }
 
 /* Listas */
-.history-list { text-align: left; padding: 0 !important; list-style: none; border-radius: 12px; border: 2px solid var(--btnShadow); background: var(--rowBg); margin: 0 20px 15px 20px !important;}
-.history-list li { padding: 12px; border-bottom: 2px solid var(--btnShadow); display: flex; justify-content: space-between; font-weight: 800; font-size: 0.95rem; }
+.history-list { text-align: left; padding: 0 !important; list-style: none; border-radius: 14px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); margin: 0 24px 16px 24px !important;}
+.history-list li { padding: 12px 16px; border-bottom: 1px solid rgba(255,255,255,0.07); display: flex; justify-content: space-between; font-weight: 800; font-size: 0.95rem; color: rgba(255,255,255,0.8); }
 .history-list li:last-child { border-bottom: none; }
 
-.badge-btn { background: #FFF !important; border: 2px solid var(--btnShadow) !important; border-radius: 12px !important; padding: 10px 14px !important; cursor: pointer; color: var(--text) !important; font-weight: 900 !important; box-shadow: none !important; transition: 0.15s; }
-.badge-btn:hover { border-color: var(--purplePrimary) !important; }
+.badge-btn { background: rgba(255,255,255,0.08) !important; border: 1px solid rgba(255,255,255,0.15) !important; border-radius: 12px !important; padding: 10px 14px !important; cursor: pointer; color: #fff !important; font-weight: 900 !important; box-shadow: none !important; transition: 0.15s; }
+.badge-btn:hover { border-color: rgba(139,92,246,0.6) !important; background: rgba(255,255,255,0.14) !important; }
 
 .badges-container { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 5px;}
 .badge-icon { background: var(--yellowPrimary) !important; color: #FFF !important; border: none !important; padding: 4px 10px !important; border-radius: 12px !important; font-size: 0.85rem !important; font-weight: 900 !important; box-shadow: none !important; }
@@ -792,23 +815,44 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 
 @keyframes iconScale { 0% { transform: scale(0.9); } 100% { transform: scale(1.1); } }
 .podium-showcase { display: flex; flex-direction: column; gap: 15px; }
-.podium-card { background: #FFF; border: 2px solid var(--theme-color); border-radius: 16px; padding: 15px; display: flex; align-items: center; gap: 15px; box-shadow: none !important; opacity: 0; animation: slideUpFade 0.4s ease-out forwards; }
+.podium-card { background: rgba(255,255,255,0.06); border: 1px solid rgba(var(--theme-rgb, 139,92,246),0.4); border-radius: 20px; padding: 18px 20px; display: flex; align-items: center; gap: 15px; box-shadow: 0 8px 30px rgba(0,0,0,0.3) !important; opacity: 0; animation: slideUpFade 0.4s ease-out forwards; backdrop-filter: blur(8px); }
 .podium-card-icon { font-size: 3rem; animation: iconScale 2s infinite alternate; width: 60px; text-align: center; }
-.podium-cat { font-size: 1.2rem; font-weight: 900; color: var(--theme-color); text-transform: uppercase; margin-bottom: 2px; }
-.podium-sub { font-size: 1rem; color: var(--subText); font-weight: 900; margin-bottom: 4px; }
-.podium-name { font-size: 1.5rem; font-weight: 900; color: var(--text); line-height: 1.1; margin-bottom: 6px; text-shadow: none; }
+.podium-cat { font-size: 1.2rem; font-weight: 900; color: #A78BFA; text-transform: uppercase; margin-bottom: 2px; }
+.podium-sub { font-size: 1rem; color: rgba(255,255,255,0.5); font-weight: 900; margin-bottom: 4px; }
+.podium-name { font-size: 1.5rem; font-weight: 900; color: #fff; line-height: 1.1; margin-bottom: 6px; text-shadow: none; }
 .podium-stat { display: inline-flex; align-items:center; background: var(--theme-color); color: white; padding: 6px 14px; border-radius: 15px; font-weight: 900; font-size: 1rem; border: none; box-shadow:none !important;}
 
 #modal-levelup .levelup-content { 
-  background: var(--cardBg) !important; padding: 40px 25px !important; border-radius: 24px !important; text-align: center !important; width: 100% !important; max-width: 450px !important;
-  border: 6px solid #F59E0B !important; border-bottom-width: 10px !important; box-shadow: 0 20px 40px rgba(0,0,0,0.2) !important; color: var(--text) !important;
+  background: linear-gradient(135deg, #1e1b4b, #0f172a) !important; padding: 40px 25px !important; border-radius: 24px !important; text-align: center !important; width: 100% !important; max-width: 450px !important;
+  border: 2px solid rgba(251,191,36,0.4) !important; box-shadow: 0 20px 60px rgba(0,0,0,0.5) !important; color: #fff !important;
 }
-#levelup-title { font-size: 2.8rem !important; color: var(--purplePrimary) !important; animation: iconScale 1s infinite alternate !important; text-shadow: none !important;}
-#levelup-name { font-size: 2.2rem !important; margin: 15px 0 !important; color: var(--text) !important; font-weight: 900 !important; }
-#levelup-info { font-size: 1.3rem !important; margin-bottom: 30px !important; color: var(--subText) !important; font-weight: 800 !important; }
+#levelup-title { font-size: 2.8rem !important; color: #FBBF24 !important; animation: iconScale 1s infinite alternate !important; text-shadow: 0 0 20px rgba(251,191,36,0.5) !important;}
+#levelup-name { font-size: 2.2rem !important; margin: 15px 0 !important; color: #fff !important; font-weight: 900 !important; }
+#levelup-info { font-size: 1.3rem !important; margin-bottom: 30px !important; color: rgba(255,255,255,0.6) !important; font-weight: 800 !important; }
 
-/* Fix selection bar */
-#selection-bar { background: #EFF6FF !important; border: 3px dashed #3B82F6 !important; padding: 12px 20px !important; border-radius: 20px !important; box-shadow: none !important; margin-bottom: 15px; flex-wrap: wrap; }
+/* Fix solo para textos dentro de modales en dark */
+.modal-gen-content p, .modal-content p { color: rgba(255,255,255,0.7) !important; }
+.modal-gen-content h3, .modal-content h3 { color: #fff !important; }
+.modal-gen-content label, .modal-content label { color: rgba(255,255,255,0.8) !important; }
+.modal-gen-content span, .modal-content span { color: inherit; }
+/* Iconos selector */
+#modal-icon-picker .modal-content { max-height: 80vh; padding-bottom: 24px !important; }
+/* Reemplazar XP viejo button en podium */
+#modal-podium .btn-large { background: linear-gradient(135deg,#7C3AED,#4F46E5) !important; border-color: transparent !important; color: #fff !important; border-radius: 20px !important; box-shadow: 0 8px 25px rgba(109,40,217,0.4) !important; letter-spacing: 0.5px; }
+/* Salón de la fama contenido fondo */
+#modal-podium .modal-gen-content > div { background: transparent; }
+/* Tienda items */
+.shop-item-card { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.12) !important; border-radius: 18px !important; box-shadow: none !important; transition: 0.2s; }
+.shop-item-card:hover { background: rgba(255,255,255,0.1) !important; border-color: rgba(139,92,246,0.4) !important; }
+.shop-item-card .item-name, .shop-item-card h4 { color: #fff !important; }
+.shop-item-card .item-price, .shop-item-card .gold-price { color: #FBBF24 !important; }
+.shop-item-card small, .shop-item-card p { color: rgba(255,255,255,0.5) !important; }
+/* Guía items */
+.guide-card { background: rgba(255,255,255,0.06) !important; border: 1px solid rgba(255,255,255,0.1) !important; border-radius: 18px !important; }
+.guide-card h4, .guide-card .xp-amount { color: #fff !important; }
+.guide-card p { color: rgba(255,255,255,0.6) !important; }
+
+
 #selection-bar span { color: #1E3A8A !important; font-size: 1.1rem !important; font-weight: 900 !important;}
 
 /* ===== PANTALLA DE CURSOS PREMIUM ===== */
@@ -1562,12 +1606,12 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 <div id="view-dash" class="view hidden" style="max-width:100%; padding:0;">
     <!-- BARRA PREMIUM -->
     <nav class="premium-navbar" id="premium-navbar">
-        <!-- Info del curso -->
+        <!-- Info del curso con icono de rol -->
         <div class="navbar-course-info">
-            <div class="navbar-course-name" id="course-title">---</div>
-            <div class="navbar-course-mode">
-                <span class="navbar-mode-pill teacher teacher-only" id="mode-indicator">👩‍🏫 Profesor</span>
-                <span class="navbar-mode-pill student student-only" id="mode-indicator-student">🎓 Pizarra</span>
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span id="role-icon-teacher" class="teacher-only" style="font-size:2rem; line-height:1; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4)); flex-shrink:0;">👨‍🏫</span>
+                <span id="role-icon-student" class="student-only" style="font-size:2rem; line-height:1; filter:drop-shadow(0 2px 8px rgba(0,0,0,0.4)); flex-shrink:0;">🎓</span>
+                <div class="navbar-course-name" id="course-title">---</div>
             </div>
         </div>
 
@@ -1609,13 +1653,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 
             <div class="nb-divider"></div>
 
-            <!-- Modo + Home + Config + Avatar -->
-            <button id="btn-toggle-role" class="nb-btn nb-btn-green teacher-only" onclick="toggleRole()" title="Cambiar Modo">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Est.
-            </button>
-            <button id="btn-toggle-role-back" class="nb-btn nb-btn-gold student-only" onclick="toggleRole()" title="Volver a Profesor">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg> Profe
-            </button>
+            <!-- Modo + Home + Config + Avatar (sin boton toggle de modo) -->
             <button class="nb-icon-btn teacher-only" onclick="goHomeFromDash()" title="Inicio">
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
             </button>
