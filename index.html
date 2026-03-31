@@ -288,6 +288,341 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
 /* Fix selection bar */
 #selection-bar { background: #EFF6FF !important; border: 3px dashed #3B82F6 !important; padding: 12px 20px !important; border-radius: 20px !important; box-shadow: none !important; margin-bottom: 15px; flex-wrap: wrap; }
 #selection-bar span { color: #1E3A8A !important; font-size: 1.1rem !important; font-weight: 900 !important;}
+
+/* ===== PANTALLA DE SELECCIÓN DE ROL (DOS MITADES) ===== */
+#view-roles {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+    padding: 0;
+    margin: 0;
+    border-radius: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.role-split-container {
+    display: flex;
+    flex: 1;
+    min-height: 100vh;
+    width: 100%;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+}
+
+.role-half {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: flex 0.4s cubic-bezier(0.34, 1.2, 0.64, 1), filter 0.3s;
+    position: relative;
+    overflow: hidden;
+    padding: 40px 20px;
+}
+
+.role-half:hover {
+    flex: 1.15;
+}
+
+.role-half-teacher {
+    background: linear-gradient(145deg, #1e3a8a 0%, #1d4ed8 40%, #2563eb 100%);
+}
+
+.role-half-student {
+    background: linear-gradient(145deg, #065f46 0%, #059669 40%, #10b981 100%);
+}
+
+.role-half-divider {
+    width: 6px;
+    background: linear-gradient(180deg, #fff 0%, rgba(255,255,255,0.3) 100%);
+    flex-shrink: 0;
+    z-index: 2;
+    box-shadow: 0 0 20px rgba(255,255,255,0.4);
+}
+
+.role-half-bg-circle {
+    position: absolute;
+    border-radius: 50%;
+    opacity: 0.08;
+    background: white;
+}
+
+.role-half-icon {
+    font-size: 9rem;
+    margin-bottom: 28px;
+    filter: drop-shadow(0 10px 30px rgba(0,0,0,0.4));
+    animation: roleIconFloat 3s ease-in-out infinite;
+    z-index: 1;
+    position: relative;
+    line-height: 1;
+    text-align: center;
+}
+
+.role-half-student .role-half-icon {
+    animation-delay: 0.5s;
+}
+
+@keyframes roleIconFloat {
+    0%, 100% { transform: translateY(0px) scale(1); }
+    50% { transform: translateY(-12px) scale(1.05); }
+}
+
+.role-half-title {
+    font-size: 2.4rem;
+    font-weight: 900;
+    color: #fff;
+    text-align: center;
+    z-index: 1;
+    position: relative;
+    text-shadow: 0 3px 10px rgba(0,0,0,0.3);
+    line-height: 1.1;
+    margin-bottom: 12px;
+}
+
+.role-half-subtitle {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.8);
+    text-align: center;
+    z-index: 1;
+    position: relative;
+    max-width: 260px;
+    line-height: 1.4;
+    margin-bottom: 32px;
+}
+
+.role-half-btn {
+    z-index: 1;
+    position: relative;
+    padding: 18px 44px;
+    font-size: 1.3rem;
+    font-weight: 900;
+    border: none;
+    border-radius: 24px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+}
+
+.role-half-btn:hover {
+    transform: translateY(-4px) scale(1.05);
+    box-shadow: 0 14px 32px rgba(0,0,0,0.4);
+}
+
+.role-half-btn:active {
+    transform: translateY(0);
+}
+
+.role-half-teacher .role-half-btn {
+    background: #FBBF24;
+    color: #1e3a8a;
+}
+
+.role-half-student .role-half-btn {
+    background: #FFF;
+    color: #065f46;
+}
+
+.role-half-badge {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(255,255,255,0.2);
+    color: #fff;
+    padding: 6px 16px;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    font-weight: 900;
+    z-index: 2;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255,255,255,0.3);
+}
+
+.role-half-teacher .role-half-badge {
+    top: 20px;
+    right: auto;
+    left: 20px;
+}
+
+.role-sparkle {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(255,255,255,0.6);
+    border-radius: 50%;
+    animation: sparkleAnim 2s ease-in-out infinite;
+}
+
+@keyframes sparkleAnim {
+    0%, 100% { opacity: 0; transform: scale(0); }
+    50% { opacity: 1; transform: scale(1); }
+}
+
+/* ===== MODAL PIN NUMÉRICO ===== */
+#modal-pin-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9998;
+    background: rgba(0,0,0,0.85);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(6px);
+}
+
+.pin-modal {
+    background: linear-gradient(145deg, #1e293b, #0f172a);
+    border-radius: 30px;
+    padding: 36px 32px;
+    max-width: 380px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 30px 80px rgba(0,0,0,0.6);
+    border: 2px solid rgba(255,255,255,0.1);
+}
+
+.pin-title {
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: #fff;
+    margin-bottom: 6px;
+}
+
+.pin-subtitle {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.6);
+    font-weight: 700;
+    margin-bottom: 28px;
+}
+
+.pin-display {
+    background: rgba(255,255,255,0.08);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 20px;
+    padding: 18px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    align-items: center;
+    min-height: 72px;
+}
+
+.pin-dot {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.2);
+    border: 2px solid rgba(255,255,255,0.3);
+    transition: 0.2s;
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.pin-dot.filled {
+    background: #FBBF24;
+    border-color: #F59E0B;
+    box-shadow: 0 0 12px rgba(251,191,36,0.6);
+}
+
+.pin-dot.error {
+    background: #EF4444;
+    border-color: #DC2626;
+    box-shadow: 0 0 12px rgba(239,68,68,0.6);
+    animation: pinShake 0.4s ease;
+}
+
+@keyframes pinShake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-6px); }
+    40% { transform: translateX(6px); }
+    60% { transform: translateX(-6px); }
+    80% { transform: translateX(6px); }
+}
+
+.pin-keypad {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    margin-bottom: 14px;
+}
+
+.pin-key {
+    background: rgba(255,255,255,0.1);
+    border: 2px solid rgba(255,255,255,0.15);
+    border-bottom-width: 5px;
+    border-radius: 18px;
+    color: #fff;
+    font-size: 2rem;
+    font-weight: 900;
+    padding: 18px 10px;
+    cursor: pointer;
+    transition: 0.15s;
+    font-family: 'Nunito', sans-serif;
+    line-height: 1;
+}
+
+.pin-key:hover {
+    background: rgba(255,255,255,0.18);
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.3);
+}
+
+.pin-key:active {
+    transform: translateY(0);
+    border-bottom-width: 2px;
+}
+
+.pin-key-del {
+    background: rgba(239,68,68,0.2);
+    border-color: rgba(239,68,68,0.3);
+    font-size: 1.5rem;
+}
+
+.pin-key-del:hover {
+    background: rgba(239,68,68,0.35);
+}
+
+.pin-key-enter {
+    background: linear-gradient(135deg, #FBBF24, #F59E0B);
+    border-color: #D97706;
+    color: #1e3a8a;
+    font-size: 1.3rem;
+    font-weight: 900;
+    letter-spacing: 0.5px;
+}
+
+.pin-key-enter:hover {
+    background: linear-gradient(135deg, #FCD34D, #FBBF24);
+}
+
+.pin-cancel-btn {
+    width: 100%;
+    padding: 14px;
+    margin-top: 4px;
+    background: transparent;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    color: rgba(255,255,255,0.6);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 900;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.pin-cancel-btn:hover {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+}
 </style>
 </head>
 <body data-role="student">
@@ -303,27 +638,92 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             Iniciar sesión con Google (Profesor)
         </button>
         <button onclick="continueAsStudent()" style="width:100%; padding:14px; border:2px solid #E2E8F0; border-bottom-width:4px; border-radius:16px; background:#F8FAFC; cursor:pointer; font-family:'Nunito'; font-weight:900; font-size:1rem; color:#64748B; transition:0.2s;" onmouseover="this.style.background='#F1F5F9'" onmouseout="this.style.background='#F8FAFC'">
-            🎓 Pizarra Estudiantes (Sin login)
+            🚀 Entrar sin cuenta (Elegir Modo)
         </button>
         <p style="font-size:0.8rem; color:#CBD5E1; margin-top:20px; font-weight:800;">Solo el Profesor necesita cuenta de Google</p>
     </div>
 </div>
 
-<!-- VISTA 1: Elegir Rol -->
+<!-- VISTA 1: Elegir Rol (DOS MITADES) -->
 <div id="view-roles" class="view hidden">
-    <h1>🚀 Aventura Matemática</h1>
-    <h2>Selecciona tu Modo de Acceso</h2>
-    <p style="text-align:center; color:var(--subText); margin-bottom:30px;">
-        El Modo Profesor permite editar. El Modo Estudiantes es de solo lectura (seguro para proyectores y pantallas interactivas).
-    </p>
-    <button class="btn-large" style="background:#FBBF24; color:#1E293B;" onclick="setRole('teacher')">👨‍🏫 Modo Profesor / Instructor</button>
-    <button class="btn-large" style="background:#8B5CF6; color:#FFF;" onclick="setRole('student')">🎓 Modo Estudiantes (Pizarra Activa)</button>
+    <div class="role-split-container">
+        <!-- MITAD IZQUIERDA: PROFESOR -->
+        <div class="role-half role-half-teacher" onclick="requestTeacherPin()">
+            <!-- Burbujas decorativas -->
+            <div class="role-half-bg-circle" style="width:350px;height:350px;top:-100px;left:-80px;"></div>
+            <div class="role-half-bg-circle" style="width:200px;height:200px;bottom:60px;right:-60px;"></div>
+            <!-- Destellos -->
+            <div class="role-sparkle" style="top:15%;left:20%;animation-delay:0s;"></div>
+            <div class="role-sparkle" style="top:70%;left:75%;animation-delay:0.7s;"></div>
+            <div class="role-sparkle" style="top:40%;left:10%;animation-delay:1.4s;"></div>
+            <!-- Insignia -->
+            <div class="role-half-badge">🔒 Acceso con PIN</div>
+            <!-- Contenido -->
+            <div class="role-half-icon">👨‍🏫</div>
+            <div class="role-half-title">Modo Profesor</div>
+            <div class="role-half-subtitle">Editar alumnos, otorgar puntos y gestionar cursos</div>
+            <button class="role-half-btn" onclick="event.stopPropagation(); requestTeacherPin()">✏️ INGRESAR</button>
+        </div>
+
+        <!-- DIVISOR -->
+        <div class="role-half-divider"></div>
+
+        <!-- MITAD DERECHA: ESTUDIANTE -->
+        <div class="role-half role-half-student" onclick="setRole('student')">
+            <!-- Burbujas decorativas -->
+            <div class="role-half-bg-circle" style="width:300px;height:300px;bottom:-80px;right:-60px;"></div>
+            <div class="role-half-bg-circle" style="width:180px;height:180px;top:50px;left:-50px;"></div>
+            <!-- Destellos -->
+            <div class="role-sparkle" style="top:20%;right:25%;animation-delay:0.3s;"></div>
+            <div class="role-sparkle" style="top:65%;right:15%;animation-delay:1s;"></div>
+            <div class="role-sparkle" style="top:85%;right:60%;animation-delay:1.8s;"></div>
+            <!-- Insignia -->
+            <div class="role-half-badge" style="left:auto;right:20px;">📺 Modo Pizarra</div>
+            <!-- Contenido -->
+            <div class="role-half-icon">🎓</div>
+            <div class="role-half-title">Modo Estudiante</div>
+            <div class="role-half-subtitle">Ver el ranking y puntajes en pizarra interactiva</div>
+            <button class="role-half-btn" onclick="event.stopPropagation(); setRole('student')">👀 ENTRAR</button>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL PIN PROFESOR -->
+<div id="modal-pin-overlay" class="hidden">
+    <div class="pin-modal">
+        <div class="pin-title">🔐 Modo Profesor</div>
+        <div class="pin-subtitle">Ingresa el PIN de acceso</div>
+        <div class="pin-display" id="pin-display">
+            <div class="pin-dot" id="pin-d0"></div>
+            <div class="pin-dot" id="pin-d1"></div>
+            <div class="pin-dot" id="pin-d2"></div>
+            <div class="pin-dot" id="pin-d3"></div>
+            <div class="pin-dot" id="pin-d4"></div>
+            <div class="pin-dot" id="pin-d5"></div>
+        </div>
+        <div class="pin-keypad">
+            <button class="pin-key" onclick="pinPress('1')">1</button>
+            <button class="pin-key" onclick="pinPress('2')">2</button>
+            <button class="pin-key" onclick="pinPress('3')">3</button>
+            <button class="pin-key" onclick="pinPress('4')">4</button>
+            <button class="pin-key" onclick="pinPress('5')">5</button>
+            <button class="pin-key" onclick="pinPress('6')">6</button>
+            <button class="pin-key" onclick="pinPress('7')">7</button>
+            <button class="pin-key" onclick="pinPress('8')">8</button>
+            <button class="pin-key" onclick="pinPress('9')">9</button>
+            <button class="pin-key pin-key-del" onclick="pinDelete()">⌫</button>
+            <button class="pin-key" onclick="pinPress('0')">0</button>
+            <button class="pin-key pin-key-enter" onclick="pinConfirm()">✓ OK</button>
+        </div>
+        <button class="pin-cancel-btn" onclick="closePinModal()">✖ Cancelar</button>
+    </div>
 </div>
 
 <!-- VISTA 2: Elegir Curso -->
 <div id="view-courses" class="view hidden">
     <button class="close-btn" onclick="switchView('roles')" style="top: 15px; right: 15px; z-index: 10;" title="Volver al inicio">✖</button>
-    <h1>Seleccionar Curso</h1>
+    <h1 id="courses-view-title">Seleccionar Curso</h1>
+    <p id="courses-view-hint" style="text-align:center; color:var(--subText); font-weight:800; margin-bottom:10px;"></p>
     
     <!-- Sección Profesor: Agregar Curso -->
     <div class="teacher-only" style="max-width: 500px; margin: 0 auto 30px; background: var(--rowBg); padding: 20px; border-radius: 20px; border: 2px dashed var(--purplePrimary);">
@@ -348,7 +748,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             <button id="user-profile-btn" class="hidden teacher-only" onclick="toggleUserMenu()" title="Mi cuenta" style="display:flex; align-items:center; justify-content:center; padding:0 !important; background:transparent !important; border:none !important; box-shadow:none !important; cursor:pointer; border-radius:50% !important; transition:0.2s; width:44px; height:44px;">
                 <img id="user-avatar" src="" width="40" height="40" style="border-radius:50%; object-fit:cover; border:3px solid var(--purplePrimary); box-shadow: 0 2px 8px rgba(0,0,0,0.2); transition:0.2s;" onerror="this.style.display='none'">
             </button>
-            <button onclick="switchView('courses')" title="Menú de Cursos" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
+            <button onclick="goHomeFromDash()" title="Pantalla de Inicio" style="display:flex; align-items:center; justify-content:center; padding: 10px !important;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></button>
 
             <!-- Separador visual -->
             <div style="width:2px; height:32px; background:var(--btnBorder); border-radius:2px; flex-shrink:0;"></div>
@@ -770,10 +1170,8 @@ function signOut() {
 
 function continueAsStudent() {
     document.getElementById('login-overlay').style.display = 'none';
-    role = 'student';
-    document.body.setAttribute('data-role', 'student');
-    switchView('courses');
-    renderCourses();
+    // Mostrar la pantalla de selección de rol (dos mitades)
+    switchView('roles');
 }
 
 auth.onAuthStateChanged(user => {
@@ -863,12 +1261,73 @@ async function saveData() {
 
 // --- Manejo de la Interfaz/Vistas ---
 
+// ===== PIN MODAL LOGIC =====
+let pinValue = '';
+const TEACHER_PIN = '243524';
+
+function requestTeacherPin() {
+    pinValue = '';
+    updatePinDisplay();
+    document.getElementById('modal-pin-overlay').classList.remove('hidden');
+}
+
+function closePinModal() {
+    pinValue = '';
+    updatePinDisplay();
+    document.getElementById('modal-pin-overlay').classList.add('hidden');
+}
+
+function pinPress(digit) {
+    if (pinValue.length >= 6) return;
+    pinValue += digit;
+    updatePinDisplay();
+    if (pinValue.length === 6) {
+        setTimeout(() => pinConfirm(), 120);
+    }
+}
+
+function pinDelete() {
+    pinValue = pinValue.slice(0, -1);
+    updatePinDisplay();
+}
+
+function updatePinDisplay() {
+    for (let i = 0; i < 6; i++) {
+        const dot = document.getElementById('pin-d' + i);
+        if (!dot) continue;
+        dot.classList.remove('filled', 'error');
+        if (i < pinValue.length) dot.classList.add('filled');
+    }
+}
+
+function pinConfirm() {
+    if (pinValue === TEACHER_PIN) {
+        closePinModal();
+        setRole('teacher');
+    } else {
+        // Animar error
+        for (let i = 0; i < 6; i++) {
+            const dot = document.getElementById('pin-d' + i);
+            if (dot) { dot.classList.remove('filled'); dot.classList.add('error'); }
+        }
+        setTimeout(() => {
+            pinValue = '';
+            updatePinDisplay();
+        }, 800);
+    }
+}
+
 function setRole(r) {
     role = r;
     selectedStudents.clear();
     document.body.setAttribute('data-role', role);
     switchView('courses');
     renderCourses();
+}
+
+function goHomeFromDash() {
+    // Desde el dashboard, ir al selector de roles
+    switchView('roles');
 }
 
 function toggleRole() {
@@ -888,6 +1347,24 @@ function switchView(vId) {
 function renderCourses() {
     const cb = document.getElementById('course-buttons');
     cb.innerHTML = '';
+
+    // Actualizar visibilidad del panel de crear curso según rol
+    const addCoursePanel = document.querySelector('#view-courses .teacher-only');
+    if (addCoursePanel) {
+        addCoursePanel.style.display = (role === 'teacher') ? '' : 'none';
+    }
+
+    // Título y hint según el rol
+    const coursesTitle = document.getElementById('courses-view-title');
+    if (coursesTitle) {
+        coursesTitle.textContent = role === 'student' ? '📚 Elige tu Curso' : '📚 Seleccionar Curso';
+    }
+    const coursesHint = document.getElementById('courses-view-hint');
+    if (coursesHint) {
+        coursesHint.textContent = role === 'student' ? 'Solo lectura — Pizarra de Estudiantes' : '';
+        coursesHint.style.display = role === 'student' ? '' : 'none';
+    }
+
     Object.keys(courses).forEach(c => {
         const container = document.createElement('div');
         container.style.position = 'relative';
@@ -914,6 +1391,7 @@ function renderCourses() {
         
         container.appendChild(b);
 
+        // Solo el profesor puede eliminar cursos
         if (role === 'teacher') {
             const delBtn = document.createElement('button');
             delBtn.innerHTML = '✖';
