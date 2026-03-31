@@ -1645,19 +1645,21 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
                 <button class="nb-icon-btn student-only" onclick="goHomeFromDash()" title="Volver al Inicio" style="background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);">
                     <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
                 </button>
+                
+                <div class="nb-divider" style="margin: 0 5px;"></div>
+
+                <!-- Búsqueda -->
+                <div class="nb-search" style="min-width: 200px;">
+                    <svg class="nb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+                    <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="onSearch(this.value)">
+                </div>
             </div>
         </div>
 
         <!-- Controles -->
         <div class="navbar-controls">
 
-            <!-- Búsqueda -->
-            <div class="nb-search">
-                <svg class="nb-search-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
-                <input type="text" id="search-input" placeholder="Buscar alumno..." oninput="onSearch(this.value)">
-            </div>
 
-            <div class="nb-divider"></div>
 
             <!-- Vista y orden -->
             <button id="btn-view-toggle" class="nb-icon-btn" onclick="toggleViewMode()" title="Cambiar Vista">
@@ -1674,8 +1676,8 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
             <div class="nb-divider"></div>
 
             <!-- Acciones -->
-            <button id="btn-show-guide" class="nb-btn" onclick="showGuide()" title="Manual de Puntos">
-                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Guía
+            <button id="btn-show-guide" class="nb-btn" onclick="showGuide()" title="Cómo Ganar Puntos">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg> Reglas de PTS
             </button>
             <button class="nb-btn nb-btn-gold" onclick="showShop()" title="Tienda">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg> Tienda
