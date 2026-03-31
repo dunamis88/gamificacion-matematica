@@ -1878,10 +1878,7 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
     </div>
 </div>
 
-<!-- Botón Flotante Modo Oscuro -->
-<button id="btn-dark-mode" onclick="toggleDarkMode()" style="position: fixed; bottom: 20px; right: 20px; z-index: 1000; width: 55px; height: 55px; border-radius: 50%; border: none; background: var(--cardBg); color: var(--text); cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.3); transition: 0.3s; display: flex; align-items: center; justify-content: center;">
-    <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-</button>
+
 
 <script>
 const svgProfile = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>`;
@@ -2347,8 +2344,9 @@ function renderList() {
     if(!currentCourse) return;
     
     // Configura Textos de Header según el estado
-    document.getElementById('course-title').innerHTML = `${currentCourse} - <span style="font-weight:400; font-size:1.1rem; color:var(--subText); display:block; margin-top:4px;">Modo <span id="mode-indicator" class="teacher-only">👩‍🏫 Profesor (Edición)</span><span id="mode-indicator-student" class="student-only">🎓 Pizarra Estudiantes</span></span>`;
-    document.getElementById('btn-toggle-role').innerText = role === 'teacher' ? '👀 Modo Estudiantes' : '✏️ Modo Profesor';
+    const titleEl = document.getElementById('course-title');
+    if (titleEl) titleEl.textContent = currentCourse;
+    // btn-toggle-role ya no existe en la nueva navbar; no hacer nada con él
 
     const list = courses[currentCourse];
     
