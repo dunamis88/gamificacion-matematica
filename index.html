@@ -1842,12 +1842,13 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
                 <button class="cfg-tab-btn" onclick="switchCfgTab('cfg-tab-students', this)">🎓 Gestión Estudiantes</button>
                 <button class="cfg-tab-btn" onclick="switchCfgTab('cfg-tab-shop', this)">🛒 Tienda de Premios</button>
                 <button class="cfg-tab-btn" onclick="switchCfgTab('cfg-tab-guide', this)">📜 Reglas de PTS</button>
+                <button class="cfg-tab-btn" onclick="switchCfgTab('cfg-tab-security', this)">🔒 Contraseña (PIN)</button>
                 <button class="cfg-tab-btn" onclick="switchCfgTab('cfg-tab-data', this)">📦 Datos y Copias</button>
             </div>
         </div>
         
         <!-- Panel Principal (Contenido de Vistas) -->
-        <div style="flex:1; padding:30px; overflow-y:auto; background:radial-gradient(circle at 50% 0%, rgba(109,40,217,0.1) 0%, transparent 60%);">
+        <div style="flex:1; padding:30px; overflow-y:auto; background:radial-gradient(circle at 50% 0%, rgba(109,40,217,0.1) 0%, transparent 60%); padding-bottom:100px;">
             
             <!-- Cursos -->
             <div id="cfg-tab-courses" class="cfg-tab-content active">
@@ -1904,6 +1905,21 @@ body.cinema-mode .level { box-shadow: 0 0 15px rgba(0,0,0,0.2) !important; }
                     <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Define qué acciones dan puntos y cuánta XP otorgan para que los alumnos lo vean.</p>
                     <div id="cfg-guide-list" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap:15px; margin-bottom:20px;"></div>
                     <button class="btn-sm" style="background:#F59E0B; color:#000; padding:12px 20px; border-radius:12px; border:none; width:100%; font-weight:900; cursor:pointer;" onclick="cfgAddGuideItem()">+ Agregar Nueva Regla</button>
+                </div>
+            </div>
+
+            <!-- Seguridad / PIN -->
+            <div id="cfg-tab-security" class="cfg-tab-content">
+                <div class="premium-panel">
+                    <h3>🔒 Contraseña / PIN Maestro</h3>
+                    <p style="font-size:0.95rem; color:rgba(255,255,255,0.6); margin-top:0;">Cambia tu clave numérica de 6 dígitos para iniciar sesión como Profesor.</p>
+                    <div style="display:flex; flex-direction:column; gap:15px; max-width: 400px; margin-top:20px;">
+                        <div>
+                            <label style="font-size:0.85rem; font-weight:bold; color:rgba(255,255,255,0.7); display:block; margin-bottom:5px;">Nuevo PIN Numérico</label>
+                            <input type="password" id="cfg-new-pin" class="premium-input" placeholder="Ej: 123456" maxlength="6" inputmode="numeric" onkeydown="if(event.key==='Enter') cfgSaveNewPin()" style="font-size:1.5rem; letter-spacing:5px; text-align:center;">
+                        </div>
+                        <button class="btn-sm" style="background:var(--purplePrimary); color:#fff; padding:12px; border-radius:12px; border:none; font-weight:900; cursor:pointer;" onclick="cfgSaveNewPin()">💾 Guardar Nueva Contraseña</button>
+                    </div>
                 </div>
             </div>
 
@@ -2334,7 +2350,9 @@ async function saveData() {
 
 // ===== PIN MODAL LOGIC =====
 let pinValue = '';
-const TEACHER_PIN = '243524';
+let TEACHER_PIN = null;
+try { TEACHER_PIN = localStorage.getItem('gamificacion_teacher_pin'); } catch(e){}
+if(!TEACHER_PIN) TEACHER_PIN = '243524';
 
 function requestTeacherPin() {
     pinValue = '';
@@ -3429,6 +3447,19 @@ function importData(event) {
     };
     reader.readAsText(file);
     event.target.value = ''; // Reset input
+}
+
+function cfgSaveNewPin() {
+    const input = document.getElementById('cfg-new-pin');
+    const val = input.value.trim();
+    if (val.length < 4 || val.length > 6 || isNaN(val)) {
+        alert("⚠️ El PIN debe contener entre 4 y 6 números.");
+        return;
+    }
+    TEACHER_PIN = val;
+    localStorage.setItem('gamificacion_teacher_pin', val);
+    alert("✅ ¡Contraseña (PIN) actualizada con éxito! La próxima vez que inicies sesión, usa el nuevo PIN.");
+    input.value = '';
 }
 
 // --- Sincronización Multi-Pestaña (Pizarra y Laptop) ---
