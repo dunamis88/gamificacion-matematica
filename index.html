@@ -3896,15 +3896,15 @@ function switchConfigToDash() {
 function cfgRenderCourses() {
     const list = document.getElementById('cfg-course-list');
     list.innerHTML = Object.keys(courses).map(c => `
-        <li style="display:flex; justify-content:space-between; padding:12px 15px; border-bottom:1px solid var(--topBarBorder); align-items:center;">
+        <li style="display:flex; justify-content:space-between; padding:12px 15px; border-bottom:1px solid rgba(255,255,255,0.08); align-items:center;">
             <div style="display:flex; align-items:center; gap:12px;">
-                <button style="font-size:1.8rem; background:var(--cardBg); border:2px solid var(--btnShadow); border-radius:12px; width:45px; height:45px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex-shrink:0;" title="Cambiar Icono" onclick="cfgOpenCourseIconPicker('${c}')">${courseIcons[c] || '🧮'}</button>
+                <button style="font-size:1.8rem; background:rgba(255,255,255,0.05); border:2px solid rgba(255,255,255,0.1); border-radius:12px; width:45px; height:45px; cursor:pointer; display:flex; align-items:center; justify-content:center; padding:0; flex-shrink:0; color:#fff;" title="Cambiar Icono" onclick="cfgOpenCourseIconPicker('${c}')">${courseIcons[c] || '🧮'}</button>
                 <div style="display:flex; flex-direction:column;">
-                    <span style="font-weight:900; font-size:1.1rem; color:var(--text); line-height:1.1; text-shadow:0 1px 2px rgba(0,0,0,0.1);">${c}</span>
-                    <span style="color:var(--subText); font-size:0.85rem; font-weight:800; opacity:0.9;">(${courses[c].length} estudiantes)</span>
+                    <span style="font-weight:900; font-size:1.1rem; color:#FFFFFF; line-height:1.1; text-shadow:0 1px 4px rgba(0,0,0,0.4);">${c}</span>
+                    <span style="color:#CBD5E1; font-size:0.85rem; font-weight:800; opacity:1;">(${courses[c].length} estudiantes)</span>
                 </div>
             </div>
-            <button class="btn-sm" style="background:#EF4444; color:white; padding:6px 12px; border-radius:10px; font-weight:900;" onclick="cfgDelCourse('${c}')">Borrar</button>
+            <button class="btn-sm" style="background:#EF4444; color:white; padding:6px 14px; border-radius:10px; font-weight:900; border:none; box-shadow:0 4px 10px rgba(239,68,68,0.3);" onclick="cfgDelCourse('${c}')">Borrar</button>
         </li>
     `).join('');
     
