@@ -2325,10 +2325,17 @@ const localData = localStorage.getItem('gamificacion_cursos');
 if(localData) {
     try { courses = JSON.parse(localData); } catch(e){}
 }
-let courseIcons = {};
+let courseIcons = {
+    "6° C": '📚',
+    "5° A": '🧮',
+    "5° B": '🎒'
+};
 const localIcons = localStorage.getItem('gamificacion_course_icons');
 if(localIcons) {
-    try { courseIcons = JSON.parse(localIcons); } catch(e){}
+    try { 
+        const parsedIcons = JSON.parse(localIcons);
+        courseIcons = {...courseIcons, ...parsedIcons}; 
+    } catch(e){}
 }
 
 // =============================================
@@ -2675,20 +2682,18 @@ function renderCourses() {
         coursesHint.textContent = role === 'student' ? 'Selecciona tu aula para ver el ranking' : 'Selecciona un curso para abrir la pizarra';
     }
 
+    const courseIconsFallback = ['📚','🧮','🎒','🏆','⭐','🚀','⚡','🧩','🎨','🪐','🎲', '🧪', '🏹', '🎨', '🎬', '🎹'];
     const courseKeys = Object.keys(courses);
-    if (courseKeys.length === 0) {
-        cb.innerHTML = `<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,0.5);font-size:1.2rem;font-weight:800;padding:40px 20px;">
-            <div style="font-size:4rem;margin-bottom:16px;">\ud83d\udced</div>
-            No hay cursos a\u00fan.<br>\u00a1Crea el primero arriba!
-        </div>`;
-        return;
-    }
-
-    const courseIconsFallback = ['📚','🧮','🎒','🏆','⭐','🚀','⚡','🧩','🎨','🪐','🎲'];
-
+    
     courseKeys.forEach((c, idx) => {
+        // Asegurar que el curso tenga un icono asignado permanentemente
+        if (!courseIcons[c]) {
+            courseIcons[c] = courseIconsFallback[idx % courseIconsFallback.length];
+            saveData(); // Persistir el icono asignado automáticamente
+        }
+        
         const colorIdx = idx % colorCount;
-        const icon = courseIcons[c] || courseIconsFallback[idx % courseIconsFallback.length];
+        const icon = courseIcons[c];
         const count = courses[c].length;
 
         const card = document.createElement('div');
@@ -2744,6 +2749,10 @@ function addCourseFromMenu() {
         return;
     }
     courses[c] = [];
+    // Asignar un icono aleatorio al crear
+    const fallbacks = ['📚','🧮','🎒','🏆','⭐','🚀','⚡','🧩','🎨','🪐','🎲', '🧪', '🏹', '🎨', '🎬', '🎹'];
+    courseIcons[c] = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+    
     saveData();
     renderCourses();
     input.value = '';
@@ -3909,7 +3918,16 @@ function cfgRenderCourses() {
 
 function cfgAddCourse() {
     const c = document.getElementById('cfg-new-course').value.trim();
-    if(c && !courses[c]) { courses[c] = []; markConfigChanged(); cfgRenderCourses(); document.getElementById('cfg-new-course').value = ''; }
+    if(c && !courses[c]) { 
+        courses[c] = []; 
+        // Asignar un icono aleatorio al crear
+        const fallbacks = ['📚','🧮','🎒','🏆','⭐','🚀','⚡','🧩','🎨','🪐','🎲', '🧪', '🏹', '🎨', '🎬', '🎹'];
+        courseIcons[c] = fallbacks[Math.floor(Math.random() * fallbacks.length)];
+        
+        markConfigChanged(); 
+        cfgRenderCourses(); 
+        document.getElementById('cfg-new-course').value = ''; 
+    }
 }
 function cfgDelCourse(c) {
     if(confirm(`⚠️ ¿ELIMINAR CURSO "${c.toUpperCase()}"? \n\nEsta acción es irreversible y se borrarán TODOS los estudiantes, registros de XP, medallas e historial de este curso. ¿Deseas continuar?`)) { 
