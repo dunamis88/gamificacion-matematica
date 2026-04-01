@@ -2443,18 +2443,20 @@ async function loadDataFromFirestore(uid) {
                 const isLocal = data.lastEvent.id === myLastEventId;
                 lastProcessedEventId = data.lastEvent.id;
                 
-                if (!isFirstLoad) {
-                    if (data.lastEvent.type === 'points' && !isLocal) {
-                        showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, data.lastEvent.icon || '✨', true);
+                if (!isFirstLoad && !isLocal) {
+                    if (data.lastEvent.type === 'points') {
+                        // Usar el mensaje completo enviado por el emisor para consistencia total en modo estudiante
+                        const msg = data.lastEvent.fullMsg || `${data.lastEvent.studentName}: ${data.lastEvent.msg}`;
+                        showToast(msg, data.lastEvent.icon || '✨', true);
                     }
-                    if (data.lastEvent.type === 'levelUp' && !isLocal) {
-                        showLevelUp(data.lastEvent.studentName, data.lastEvent.level);
+                    if (data.lastEvent.type === 'levelUp') {
+                        showLevelUp(data.lastEvent.studentName, data.lastEvent.level, data.lastEvent.isMassive || false);
                     }
-                    if (data.lastEvent.type === 'badge' && !isLocal) {
-                        showToast(`${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
+                    if (data.lastEvent.type === 'badge') {
+                        showToast(data.lastEvent.fullMsg || `${data.lastEvent.studentName}: ${data.lastEvent.msg}`, '🎖️', true);
                     }
-                    if (data.lastEvent.type === 'dismissLevelUp' && !isLocal) {
-                        hideLevelUp(true); // Cerrar remotamente
+                    if (data.lastEvent.type === 'dismissLevelUp') {
+                        hideLevelUp(true);
                     }
                 }
             }
@@ -2934,24 +2936,45 @@ function addXPToSelected(amount, customHistoryMsg = null, isUndoRedo = false) {
         }
     });
 
-    // --- Notificación Unificada (Solución a lista interminable) ---
+    // --- Notificación Unificada (Sincronización Total) ---
     if (studentsCount > 0) {
-        const finalMsg = customHistoryMsg || `${amount > 0 ? '+' : ''}${amount} XP por su trabajo`;
+        const sign = amount > 0 ? '+' : '';
         const actionIcon = amount > 0 ? '👥' : '⚠️';
+        const finalMsg = customHistoryMsg || `${sign}${amount} XP por su trabajo`;
         
-        // Mostrar una sola notificación general
-        showToast(`${currentCourse}: ${amount > 0 ? '+' : ''}${amount} puntos por ${finalMsg}`, actionIcon);
+        // Mensaje final exacto: "Curso +15 puntos por..."
+        const fullMsg = `${currentCourse} ${sign}${amount} puntos por ${finalMsg}`;
         
-        // Sincronización remota única para el grupo
+        // Mostrar localmente al profesor
+        showToast(fullMsg, actionIcon);
+        
+        // Sincronización remota (para que el Modo Estudiante lo vea igual)
         const evId = Date.now() + Math.random();
         myLastEventId = evId;
         lastFirebaseEvent = {
             id: evId,
             type: 'points',
+            fullMsg: fullMsg, // Enviamos el string ya formateado
             studentName: currentCourse,
-            msg: `${amount > 0 ? '+' : ''}${amount} puntos por ${finalMsg}`,
+            msg: finalMsg,
             icon: actionIcon
         };
+
+        // Si hubo subidas de nivel, preparamos un evento de nivel masivo DESPUÉS de los puntos
+        if (leveledUpStudents.length > 0) {
+            setTimeout(() => {
+                const lvId = Date.now() + Math.random();
+                myLastEventId = lvId;
+                lastFirebaseEvent = {
+                    id: lvId,
+                    type: 'levelUp',
+                    studentName: leveledUpStudents.length === 1 ? leveledUpStudents[0].name : `${leveledUpStudents.length} Estudiantes`,
+                    level: leveledUpStudents[0].level,
+                    isMassive: leveledUpStudents.length > 1
+                };
+                saveData(); // Empujar el evento de nivel a la nube
+            }, 800);
+        }
     }
     // -----------------------------------------------------------
     // NO vaciamos la selección para mantener la asistencia
@@ -3020,18 +3043,23 @@ function addXP(id, amount, customHistoryMsg = null, isUndoRedo = false) {
 
     const toastMsg = customHistoryMsg || `${amount > 0 ? '+' : ''}${amount} XP/Oro`;
     
-    // Preparar evento para sincronización remota
+    const sign = amount > 0 ? '+' : '';
+    const fullMsg = `${sign}${amount} puntos a ${s.name}`;
+    const actionIcon = amount > 0 ? '✨' : '⚠️';
+
+    // Preparar evento para sincronización remota con mensaje completo
     const evId = Date.now() + Math.random();
     myLastEventId = evId;
     lastFirebaseEvent = {
         id: evId,
         type: 'points',
+        fullMsg: fullMsg,
         studentName: s.name,
         msg: toastMsg,
-        icon: amount > 0 ? '✨' : '⚠️'
+        icon: actionIcon
     };
 
-    showToast(`${amount > 0 ? '+' : ''}${amount} puntos a ${s.name}`, amount > 0 ? '✨' : '⚠️');
+    showToast(fullMsg, actionIcon);
 
     if(s.history.length > 30) s.history.pop();
     
