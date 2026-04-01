@@ -2911,6 +2911,7 @@ function addXPToSelected(amount, customHistoryMsg = null, isUndoRedo = false) {
 
     let studentsAssigned = [];
     let leveledUpStudents = [];
+    let studentsCount = selectedStudents.size;
     
     selectedStudents.forEach(id => {
         const s = courses[currentCourse].find(x => x.id === id);
@@ -2925,39 +2926,34 @@ function addXPToSelected(amount, customHistoryMsg = null, isUndoRedo = false) {
             s.history.unshift({ desc: msg, date: new Date().toLocaleDateString() });
             if(s.history.length > 30) s.history.pop();
             
-            showToast(`${s.name}: ${msg}`, '✨');
-            
             const newLevelInfo = getLevelInfo(s.xp);
-            if (newLevelInfo.level > oldLevelInfo.level) {
-                const lvId = Date.now() + Math.random();
-                myLastEventId = lvId;
-                lastFirebaseEvent = {
-                    id: lvId,
-                    type: 'levelUp',
-                    studentName: s.name,
-                    level: newLevelInfo.level
-                };
-                showLevelUp(s.name, newLevelInfo.level);
-            }
-            // Evento de puntos (si no hubo level up)
-            if (!lastFirebaseEvent || lastFirebaseEvent.type !== 'levelUp') {
-                const evId = Date.now() + Math.random();
-                myLastEventId = evId;
-                lastFirebaseEvent = {
-                    id: evId,
-                    type: 'points',
-                    studentName: 'Grupo',
-                    msg: `+${amount} XP a varios estudiantes`,
-                    icon: '👥'
-                };
-            }
-            
             studentsAssigned.push(id);
             if(newLevelInfo.level > oldLevelInfo.level) {
                 leveledUpStudents.push({name: s.name, level: newLevelInfo.level});
             }
         }
     });
+
+    // --- Notificación Unificada (Solución a lista interminable) ---
+    if (studentsCount > 0) {
+        const finalMsg = customHistoryMsg || `${amount > 0 ? '+' : ''}${amount} XP por su trabajo`;
+        const actionIcon = amount > 0 ? '👥' : '⚠️';
+        
+        // Mostrar una sola notificación general
+        showToast(`${currentCourse}: ${amount > 0 ? '+' : ''}${amount} puntos por ${finalMsg}`, actionIcon);
+        
+        // Sincronización remota única para el grupo
+        const evId = Date.now() + Math.random();
+        myLastEventId = evId;
+        lastFirebaseEvent = {
+            id: evId,
+            type: 'points',
+            studentName: currentCourse,
+            msg: `${amount > 0 ? '+' : ''}${amount} puntos por ${finalMsg}`,
+            icon: actionIcon
+        };
+    }
+    // -----------------------------------------------------------
     // NO vaciamos la selección para mantener la asistencia
     saveData();
     renderList();
@@ -3035,7 +3031,7 @@ function addXP(id, amount, customHistoryMsg = null, isUndoRedo = false) {
         icon: amount > 0 ? '✨' : '⚠️'
     };
 
-    showToast(`${s.name}: ${toastMsg}`, amount > 0 ? '✨' : '⚠️');
+    showToast(`${amount > 0 ? '+' : ''}${amount} puntos a ${s.name}`, amount > 0 ? '✨' : '⚠️');
 
     if(s.history.length > 30) s.history.pop();
     
