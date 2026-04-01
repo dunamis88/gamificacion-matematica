@@ -2151,7 +2151,6 @@ let shopItems = [
 let rewardSources = [
     { title: 'Participación Estelar', desc: 'Levantar la mano y participar activamente en clase.', points: 10, icon: '🗣️', type: 'individual' },
     { title: 'Tarea Completa', desc: 'Entregar tus deberes a tiempo y con buena calidad.', points: 20, icon: '📚', type: 'individual' },
-    { title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹', type: 'group' },
     { title: 'Ayudante Pro', desc: 'Colaborar con el profesor y ayudar a repartir materiales.', points: 15, icon: '🤝', type: 'individual' },
     { title: 'Compañerismo', desc: 'Ayudar a un compañero que tenga dudas o dificultades.', points: 10, icon: '💖', type: 'group' },
     { title: 'Super Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫', type: 'group' }
@@ -2886,7 +2885,7 @@ function renderSelectionBarActions() {
         <button class="btn-sm" style="background:#FEE2E2; color:#EF4444; border-color:#FECACA; font-weight:900;" onclick="addXPToSelected(-5, 'Corrección (-5)')">-5 XP (Ajuste)</button>
     `;
     
-    const groupRules = rewardSources.filter(r => r.type === 'group');
+    const groupRules = rewardSources.filter(r => r.type === 'group' && !r.title.toLowerCase().includes('limpieza') && !r.title.toLowerCase().includes('comportamiento'));
     groupRules.forEach(r => {
         html += `<button class="btn-sm" style="background:var(--purplePrimary); color:white; border-color:var(--purpleSecondary);" onclick="addXPToSelected(${r.points}, '${r.icon} ${r.title}')" title="${r.desc}">${r.icon} ${r.title} (+${r.points})</button>`;
     });
@@ -3419,7 +3418,6 @@ function showShop(studentId = null) {
 
 function showGuide() {
     if(!rewardSources.some(s => s.type === 'group')) {
-        rewardSources.push({ title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹', type: 'group' });
         rewardSources.push({ title: 'Súper Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫', type: 'group' });
         saveData();
     }

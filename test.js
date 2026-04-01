@@ -16,7 +16,6 @@ let shopItems = [
 let rewardSources = [
     { title: 'Participación Estelar', desc: 'Levantar la mano y participar activamente en clase.', points: 10, icon: '🗣️' },
     { title: 'Tarea Completa', desc: 'Entregar tus deberes a tiempo y con buena calidad.', points: 20, icon: '📚' },
-    { title: 'Limpieza del Aula', desc: 'Mantener tu puesto de trabajo y el salón impecables.', points: 5, icon: '🧹' },
     { title: 'Ayudante Pro', desc: 'Colaborar con el profesor y ayudar a repartir materiales.', points: 15, icon: '🤝' },
     { title: 'Compañerismo', desc: 'Ayudar a un compañero que tenga dudas o dificultades.', points: 10, icon: '💖' },
     { title: 'Super Silencio', desc: 'Trabajar en total concentración durante las actividades.', points: 5, icon: '🤫' }
